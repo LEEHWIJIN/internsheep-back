@@ -1,0 +1,23 @@
+{
+  "name": "homework2-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server"
+  },
+  "dependencies": {
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "joi": "^14.3.0",
+    "jsonwebtoken": "^8.4.0",
+    "moment": "^2.22.2",
+    "mongoose": "^5.3.14",
+    "mongoose-auto-increment": "^5.0.1",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {},
+  "author": "",
+  "description": ""
+}
