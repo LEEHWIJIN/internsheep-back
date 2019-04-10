@@ -19,5 +19,13 @@
   },
   "devDependencies": {},
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LEEHWIJIN/internsheep-back.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LEEHWIJIN/internsheep-back/issues"
+  },
+  "homepage": "https://github.com/LEEHWIJIN/internsheep-back#readme",
   "description": ""
 }
