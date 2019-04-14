@@ -1,5 +1,7 @@
 module.exports = {
-    SECRET:"WeBsYsTeMtEaMpRoJeCt12",
-    PORT: 8888,
-    DB: "mongodb://localhost:27017/capstone"
+        host : 'localhost',
+        user : 'root',
+        password : 'dlsxjstnlq1!',
+        port : '10022',
+        database : 'my_db'
 }
