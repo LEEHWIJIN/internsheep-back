@@ -1,4 +1,4 @@
-const Router = require('Express')
+const Router = require('express')
 const router = Router()
 //const connection = require('../db/mysql')
 var mysql = require('mysql');
@@ -11,8 +11,9 @@ router.get('/', function(req,res){
 
 router.get('/persons', function(req, res){
 
+    connection.connect()
     connection.query('SELECT * from Persons', function(err, rows){
-        if(err) throw err
+        if(err) console.log(err)
 
         console.log('The solution is : ', rows)
         res.send(rows)
