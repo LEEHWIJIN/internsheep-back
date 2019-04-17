@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
-require('./db/mysql') //connect db
+require('./db/database_config') //connect db
 
 const test = require('./routes/test')
 const app = express()
