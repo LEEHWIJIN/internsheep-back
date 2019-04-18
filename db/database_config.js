@@ -1,6 +1,7 @@
 var mysql = require('mysql');
 var config = require('../db/database_infomations').local;
-module.exports = function () {
+
+module.exports = function() {
   return {
     init: function () {
       return mysql.createConnection({
