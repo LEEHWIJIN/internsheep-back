@@ -5,7 +5,7 @@ module.exports = (function () {
       port: '3306',
       user: 'root',
       password: 'Dlsxjstnlq1!',
-      database: 'test_db'
+      database: 'internsheep'
     },
     real: { // real server db info
       host: '',
