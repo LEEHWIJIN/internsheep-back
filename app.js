@@ -4,7 +4,7 @@ const path = require('path')
 require('./db/database_config') //connect db
 
 const std = require('./routes/std')
-const co = require('./routes/co')
+const coMypage = require('./routes/coMypage')
 const app = express()
 
 app.use((req, res, next) =>{
@@ -19,6 +19,6 @@ app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/std', std)
-app.use('/co', co)
+app.use('/co/mypage', coMypage)
 
 module.exports = app
