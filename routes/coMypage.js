@@ -19,7 +19,7 @@ router.post('/writeNotice', function(req, res){
         }
     })
 })
-router.post('/writeNotice', function(req, res){
+router.post('/modifyNotice', function(req, res){
     var cName = req.body.cName
     var cManagerName = req.body.cManagerName
     var sql = 'INSERT INTO CompanyAnnouncement (cName, cManagerName) VALUES(?,?)'
