@@ -12,10 +12,24 @@ router.post('/resume', function(req, res){
     conn.init().query(sql,params, function(err, rows){
         if(err) console.log(err)
         else {
-            console.log(res.insertId)
+            console.log(rows)
             res.send(rows)
         }
     })
 })
 
+router.post('/list', function(req, res){
+    var sql = 'SELECT * FROM CompanyAnnouncement'
+    conn.init().query(sql,function(err, rows){
+        var responseData= []
+        if(err) console.log(err)
+        else {
+            for (var i = 0; i < rows.length; i++) {
+                responseData[i] = rows[i]
+            }
+            console.log(responseData)
+            return res.json(responseData)
+        }
+    })
+})
 module.exports = router
