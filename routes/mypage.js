@@ -6,8 +6,8 @@ var conn = mysql()
 router.post('/resume', function(req, res){
     var sNum = req.body.sNum
     var sName = req.body.sName
-    var sql = 'INSERT INTO Resume (sNum, sName) VALUES(?,?)'
-    var params = [sNum, sName]
+    var sql = 'INSERT INTO resume (sName, sNum) VALUES(?,?)'
+    var params = [sName, sNum]
 
     conn.init().query(sql,params, function(err, rows) {
         if(err) console.log(err)
@@ -18,31 +18,64 @@ router.post('/resume', function(req, res){
     })
 })
 
+router.get('/watchResume', function(req, res){
+    var sql = 'SELECT sName, sNum FROM resume'
+    conn.init().query(sql, function(err, rows) {
+        var responseData = []
+        if(err) console.log(err)
+        else {
+            for(var i = 0; i<rows.length; i++) {
+                if (rows[i].sName == req.body.sName)
+                    responseData[0] = rows[i]
+            }
+            return res.json(responseData)
+        }
+    })
+})
+
+router.post('/modifyResume', function(req, res){
+    var sql = 'UPDATE resume SET sName=?, sNum=? WHERE sName=?'
+    var sNum = req.body.sNum
+    var sName = req.body.sName
+    var params = [sName, sNum,sName]
+    conn.init().query(sql,params, function(err, rows) {
+        if(err) console.log(err)
+        else {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
 router.post('/applyCo', function(req, res){
-    var sql2 = 'SELECT * FROM companyNotice'
-    var wantID
-    conn.init().query(sql2,function(err, rows){
+    var sql = 'INSERT INTO studentApplyCompany (cName, YN, sName) VALUES(?,?,?)'
+    var cName = req.body.cName
+    var sName = req.body.sName
+    var params = [cName,0,sName]
+
+    conn.init().query(sql,params, function(err, rows){
+        if(err) console.log(err)
+        else {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
+router.get('/applyStatus', function(req, res){
+    var sql = 'SELECT cName, sName, YN FROM studentApplyCompany'
+    conn.init().query(sql,function(err, rows){
+        var responseData= []
         if(err) console.log(err)
         else {
             for (var i = 0; i < rows.length; i++) {
-                console.log(rows[i].cName)
-                if(rows[i].cName == req.body.cName) {
-                    wantID = rows[i].cNoticeID
+                if(rows[i].sName == req.body.sName) {
+                    console.log(rows[i].sName)
+                    responseData[0] = rows[i]
                 }
             }
-
-            var sql1 = 'INSERT INTO studentApplyCompany (cNoticeID, cName, YN) VALUES(?,?,?)'
-            var cNoticeID = wantID
-            var cName = req.body.cName
-            var params = [cNoticeID,cName,0]
-
-            conn.init().query(sql1,params, function(err, rows){
-                if(err) console.log(err)
-                else {
-                    console.log(rows)
-                    res.send(rows)
-                }
-            })
+            console.log(responseData)
+            return res.json(responseData)
         }
     })
 })
