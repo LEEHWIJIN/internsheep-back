@@ -19,7 +19,7 @@ router.post('/resume', function(req, res){
 })
 
 router.post('/list', function(req, res){
-    var sql = 'SELECT * FROM CompanyAnnouncement'
+    var sql = 'SELECT * FROM CompanyNotice'
     conn.init().query(sql,function(err, rows){
         var responseData= []
         if(err) console.log(err)
@@ -29,6 +29,21 @@ router.post('/list', function(req, res){
             }
             console.log(responseData)
             return res.json(responseData)
+        }
+    })
+})
+
+router.post('/applyCo', function(req, res){
+    var sql = 'INSERT INTO Resume (cName, YN) VALUES(?,?)'
+    var sNum = req.body.sNum
+    var sName = req.body.sName
+    var params = [sNum, sName]
+
+    conn.init().query(sql,params, function(err, rows){
+        if(err) console.log(err)
+        else {
+            console.log(rows)
+            res.send(rows)
         }
     })
 })
