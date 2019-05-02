@@ -16,11 +16,12 @@ router.get('/watchApplyStd', function(req, res){
     })
 })
 
-router.put('/postApplyStd', function(req, res){
+router.post('/postApplyStd', function(req, res){
     var sql = 'UPDATE studentApplyCompany SET YN = ? WHERE sName = ?'
     var sName = req.body.sName
     var YN = req.body.YN
-    conn.init().query(sql, YN, sName, function(err, rows){
+    var params = [YN, sName]
+    conn.init().query(sql, params, function(err, rows){
         if(err) console.log(err)
         else {
             console.log(rows)
