@@ -1,18 +1,7 @@
 const Router = require('express')
 const router = Router()
-const multer = require("multer")
 const mysql = require('../db/database_config.js')
 var conn = mysql()
-
-let storage = multer.diskStorage({
-    destination: function (req,file,cb) {
-        cb(null, 'uploads/')
-    },
-    filename: function (req,file,cb) {
-        cb(null, file.originalname)
-    }
-})
-var upload = multer({storage:storage})
 
 router.post('/resume', function(req, res){
     var sNum = req.body.sNum
@@ -92,26 +81,6 @@ router.get('/applyStatus', function(req, res){
                 console.log(responseData)
                 return res.json(responseData)
             }
-        }
-    })
-})
-
-router.post('/postReportAndReview', upload.single('user_report'), function(req, res){
-    let file = req.file
-    let result = {
-        originalname: file.originalname,
-        size:file.size
-    }
-    var sql = 'INSERT INTO report (sName, reportContent) VALUES(?,?)'
-    var sName = req.body.sName
-    var reportContent = result
-    var params = [sName,reportContent]
-
-    conn.init().query(sql,params, function(err, rows){
-        if(err) console.log(err)
-        else {
-            console.log(rows)
-            res.send(rows)
         }
     })
 })
