@@ -12,7 +12,6 @@ router.post('/resume', function(req, res){
     conn.init().query(sql,params, function(err, rows) {
         if(err) console.log(err)
         else {
-            console.log(rows)
             res.send(rows)
         }
     })
@@ -41,7 +40,6 @@ router.post('/modifyResume', function(req, res){
     conn.init().query(sql,params, function(err, rows) {
         if(err) console.log(err)
         else {
-            console.log(rows)
             res.send(rows)
         }
     })
@@ -56,7 +54,6 @@ router.post('/applyCo', function(req, res){
     conn.init().query(sql,params, function(err, rows){
         if(err) console.log(err)
         else {
-            console.log(rows)
             res.send(rows)
         }
     })
@@ -69,16 +66,17 @@ router.get('/applyStatus', function(req, res){
         if(err) console.log(err)
         else {
             for (var i = 0; i < rows.length; i++) {
-                if(rows[i].sName == req.params.sName) {
-                    console.log(rows[i].sName)
+                if(rows[i].sName == req.query.sName) {
                     responseData[0] = rows[i]
                 }
             }
-            if(responseData==null){
+            if(responseData[0]==null){
+                console.log('널입니다.')
                 return res.send(false)
             }
             else {
-                console.log(responseData)
+                console.log(responseData[0])
+                console.log('값이 있습니다.')
                 return res.json(responseData)
             }
         }

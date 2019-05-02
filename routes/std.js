@@ -13,7 +13,6 @@ router.get('/list', function(req, res){
             for (var i = 0; i < rows.length; i++) {
                 responseData[i] = rows[i]
             }
-            console.log(responseData)
             return res.json(responseData)
         }
     })
