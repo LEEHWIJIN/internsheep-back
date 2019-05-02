@@ -16,7 +16,7 @@ router.get('/watchApplyStd', function(req, res){
     })
 })
 
-router.post('/postApplyStd', function(req, res){
+router.put('/postApplyStd', function(req, res){
     var sql = 'UPDATE studentApplyCompany SET YN = ? WHERE sName = ?'
     var sName = req.body.sName
     var YN = req.body.YN
