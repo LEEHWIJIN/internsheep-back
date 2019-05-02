@@ -25,7 +25,7 @@ router.get('/watchResume', function(req, res){
         if(err) console.log(err)
         else {
             for(var i = 0; i<rows.length; i++) {
-                if (rows[i].sName == req.body.sName)
+                if (rows[i].sName == req.params.sName)
                     responseData[0] = rows[i]
             }
             return res.json(responseData)
@@ -69,7 +69,7 @@ router.get('/applyStatus', function(req, res){
         if(err) console.log(err)
         else {
             for (var i = 0; i < rows.length; i++) {
-                if(rows[i].sName == req.body.sName) {
+                if(rows[i].sName == req.params.sName) {
                     console.log(rows[i].sName)
                     responseData[0] = rows[i]
                 }
