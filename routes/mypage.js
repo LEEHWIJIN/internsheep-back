@@ -24,7 +24,7 @@ router.get('/watchResume', function(req, res){
         if(err) console.log(err)
         else {
             for(var i = 0; i<rows.length; i++) {
-                if (rows[i].sName == req.params.sName)
+                if (rows[i].sName == req.query.sName)
                     responseData[0] = rows[i]
             }
             return res.json(responseData)
@@ -71,12 +71,62 @@ router.get('/applyStatus', function(req, res){
                 }
             }
             if(responseData[0]==null){
-                console.log('널입니다.')
                 return res.send(false)
             }
             else {
-                console.log(responseData[0])
-                console.log('값이 있습니다.')
+                return res.json(responseData)
+            }
+        }
+    })
+})
+
+router.post('/postReportAndReview', function(req, res){
+    var sql1 = 'INSERT INTO companyReview (cName, starScore, sName) VALUES(?,?,?)'
+    var sql2 = 'INSERT INTO report (sName, reportContent) VALUES(?,?,?)'
+    var cName = req.body.cName
+    var sName = req.body.sName
+    var starScore = req.body.starScore
+    var params1 = [cName,starScore,sName]
+
+    conn.init().query(sql1,params1, function(err, rows){
+        if(err) console.log(err)
+        else {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
+router.post('/modifyReportAndReview', function(req, res){
+    var sql1 = 'UPDATE companyReview SET starScore=? WHERE sName=?'
+    var sName = req.body.sName
+    var starScore = req.body.starScore
+    var params1 = [starScore,sName]
+
+    conn.init().query(sql1,params1, function(err, rows){
+        if(err) console.log(err)
+        else {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
+router.get('/watchReportAndReview', function(req, res){
+    var sql = 'SELECT cName, sName, starScore FROM companyReview'
+    conn.init().query(sql,function(err, rows){
+        var responseData= []
+        if(err) console.log(err)
+        else {
+            for (var i = 0; i < rows.length; i++) {
+                if(rows[i].sName == req.query.sName) {
+                    responseData[0] = rows[i]
+                }
+            }
+            if(responseData[0]==null){
+                return res.send(false)
+            }
+            else {
                 return res.json(responseData)
             }
         }
