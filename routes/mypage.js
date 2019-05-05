@@ -2,6 +2,8 @@ const Router = require('express')
 const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
+let multer = require('multer');
+let upload = multer({dest : 'upload/' });
 
 router.post('/resume', function(req, res){
     var sNum = req.body.sNum
@@ -80,19 +82,25 @@ router.get('/applyStatus', function(req, res){
     })
 })
 
-router.post('/postReportAndReview', function(req, res){
+router.post('/postReportAndReview',upload.single('file'), function(req, res){
     var sql1 = 'INSERT INTO companyReview (cName, starScore, sName) VALUES(?,?,?)'
-    var sql2 = 'INSERT INTO report (sName, reportContent) VALUES(?,?,?)'
+    var sql2 = 'INSERT INTO report (sName, reportContent) VALUES(?,?)'
     var cName = req.body.cName
     var sName = req.body.sName
     var starScore = req.body.starScore
+    var reportContent = req.file.path
     var params1 = [cName,starScore,sName]
-
-    conn.init().query(sql1,params1, function(err, rows){
+    var params2 = [sName, reportContent]
+    conn.init().query(sql2, params2, function(err, rows){
         if(err) console.log(err)
         else {
             console.log(rows)
-            res.send(rows)
+        }
+    })
+    conn.init().query(sql1, params1, function(err, rows){
+        if(err) console.log(err)
+        else {
+            console.log(rows)
         }
     })
 })
