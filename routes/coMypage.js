@@ -16,7 +16,7 @@ router.get('/watchApplyStd', function(req, res) {
 
     function firstSql() {
         var sql = 'SELECT* FROM studentApplyCompany WHERE cName = ?'
-        var cName = req.body.cName
+        var cName = req.query.cName
         var sNames = []
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cName, function (err, rows) {
