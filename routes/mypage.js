@@ -2,8 +2,18 @@ const Router = require('express')
 const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
-let multer = require('multer');
-let upload = multer({dest : 'upload/' });
+let multer = require('multer')
+var fs = require("fs")
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './routes/upload/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+    },
+    filename: function (req, file, cb) {
+        cb(null, req.body.sName+'-'+file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+    }
+})
+
+var upload = multer({ storage: storage })
 
 router.post('/resume', function(req, res){
     var sNum = req.body.sNum
@@ -88,7 +98,11 @@ router.post('/postReportAndReview',upload.single('file'), function(req, res){
     var cName = req.body.cName
     var sName = req.body.sName
     var starScore = req.body.starScore
-    var reportContent = req.file.path
+    var before = req.file.path
+
+    var after = before.split('\\')
+    var afterLength = after.length
+    var reportContent = after[afterLength-1]
     var params1 = [cName,starScore,sName]
     var params2 = [sName, reportContent]
     conn.init().query(sql2, params2, function(err, rows){
@@ -101,6 +115,35 @@ router.post('/postReportAndReview',upload.single('file'), function(req, res){
         if(err) console.log(err)
         else {
             console.log(rows)
+        }
+    })
+})
+
+router.get('/downloadReport', function(req,res){
+    var sql = 'SELECT reportContent FROM report WHERE sName = ?'
+    var sName = req.query.sName
+
+    conn.init().query(sql, sName, function(err, rows){
+        if(err) console.log(err)
+        else {
+            var filePath = __dirname+'\\upload\\'+rows[0].reportContent
+            var arr = rows[0].reportContent.split('-')
+            var fileName = arr[1]
+            console.log(fileName)
+            var data = {
+                "filePath" : encodeURIComponent(filePath),
+                "fileName" : fileName
+            }
+            res.json(data)
+            //
+            // console.log(filePath)
+            // var arr = before.split("-")
+            // var originName = arr[1]
+            // var fileName = originName
+            // res.setHeader("Content-Disposition", "attachment;filename =" +encodeURI(fileName))
+            // res.setHeader("Content-Type","binary/octet-stream")
+            // var fileStream = fs.createReadStream(filePath)
+            // fileStream.pipe(res)
         }
     })
 })
