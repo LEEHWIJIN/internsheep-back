@@ -131,7 +131,7 @@ router.get('/loadFileName', function (req,res) {
                 res.send(rows[0].reportRealName)
             }
         }
-     })
+    })
 })
 
 router.get('/downloadReport', function (req,res) {
@@ -176,32 +176,32 @@ router.post('/modifyReportAndReview', upload.single('file'), function (req, res)
             })
         })
     }
-   function second() {
-       return new Promise(function (resolve, reject) {
-           var sql1 = 'UPDATE companyReview SET starScore= ? WHERE sName= ?'
-           var sql2 = 'UPDATE report SET reportRealName = ?, reportURL = ? WHERE sName=?'
-           var sNum = req.body.sNum
-           var starScore = req.body.starScore
-           var reportURL = req.file.path
-           var reportRealName = req.body.name
-           var params1 = [starScore,sName]
-           var params2 = [reportRealName, reportURL, sName]
-           console.log(params2)
-           conn.init().query(sql2, params2, function (err, rows) {
-               if (err) console.log(err)
-               else {
-                   console.log(rows)
-               }
-           })
-           conn.init().query(sql1, params1, function (err, rows) {
-               if (err) console.log(err)
-               else {
-                   console.log(rows)
-               }
-           })
-           resolve()
-       })
-   }
+    function second() {
+        return new Promise(function (resolve, reject) {
+            var sql1 = 'UPDATE companyReview SET starScore= ? WHERE sName= ?'
+            var sql2 = 'UPDATE report SET reportRealName = ?, reportURL = ? WHERE sName=?'
+            var sNum = req.body.sNum
+            var starScore = req.body.starScore
+            var reportURL = req.file.path
+            var reportRealName = req.body.name
+            var params1 = [starScore,sName]
+            var params2 = [reportRealName, reportURL, sName]
+            console.log(params2)
+            conn.init().query(sql2, params2, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                }
+            })
+            conn.init().query(sql1, params1, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                }
+            })
+            resolve()
+        })
+    }
 })
 
 module.exports = router
