@@ -150,7 +150,7 @@ router.get('/downloadReport', function (req, res) {
 
 router.get('/testDownload', function (req, res) {
 
-    var file = '/Users/kakao/Downloads/thankyou.png';
+    var file = __dirname + '/../upload/' + 'test.jpeg' ;
     res.download(file); // Set disposition and send it.
 
 })
