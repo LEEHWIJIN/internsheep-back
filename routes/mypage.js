@@ -150,7 +150,7 @@ router.get('/downloadReport', function (req, res) {
 
 router.get('/testDownload', function (req, res) {
 
-    var file = __dirname + '/../upload/' + 'test.jpeg' ;
+    var file = __dirname + '/../upload/' + 'server.js' ;
     res.download(file); // Set disposition and send it.
 
 })
