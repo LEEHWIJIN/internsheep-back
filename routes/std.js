@@ -3,17 +3,17 @@ const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
 
-router.post('/resume', function(req, res){
-    var sNum = req.body.sNum
-    var sName = req.body.sName
-    var sql = 'INSERT INTO Resume (sNum, sName) VALUES(?,?)'
-    var params = [sNum, sName]
 
-    conn.init().query(sql,params, function(err, rows){
+router.get('/list', function(req, res){
+    var sql = 'SELECT * FROM companyNotice'
+    conn.init().query(sql,function(err, rows){
+        var responseData= []
         if(err) console.log(err)
         else {
-            console.log(res.insertId)
-            res.send(rows)
+            for (var i = 0; i < rows.length; i++) {
+                responseData[i] = rows[i]
+            }
+            return res.json(responseData)
         }
     })
 })
