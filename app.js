@@ -2,8 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
 require('./db/database_config') //connect db
-
 const std = require('./routes/std')
+const mypage = require('./routes/mypage')
 const coMypage = require('./routes/coMypage')
 const app = express()
 
@@ -20,5 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/std', std)
 app.use('/co/mypage', coMypage)
+app.use('/std/mypage', mypage)
+app.user('/co/mypage', coMypage)
 
 module.exports = app
