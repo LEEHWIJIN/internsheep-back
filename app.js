@@ -32,5 +32,4 @@ app.use('/std/auth', auth)
 app.use('/std', std)
 app.use('/std/mypage', mypage)
 
-
 module.exports = app
