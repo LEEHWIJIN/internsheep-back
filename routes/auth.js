@@ -64,7 +64,7 @@ router.post('/login',(req,res)=>{
                         },(err, token) => {
                             if(err){
                                 console.log(err)
-                                return res.status(404).json({error:'jwt에서 문제'});
+                                return res.status(404).json({error:'토큰만료'});
                             }
                             else{
                                 res.json({token})

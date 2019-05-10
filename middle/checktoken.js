@@ -7,8 +7,9 @@ function checktoken(req, res, next){
         const token = authheader.split(' ')[1];
         if(token){
             jwt.verify(token, SECRET, (err, user)=>{
-                if(err){
-                    console.log(err);
+                if(err){//토큰 만료시
+                    //console.log(err);
+                    res.send({result : 1});
                 }
                 req.user = user;
                 next(); //유저 정보를 넘긴후 다음 callback 함수를 실행함
