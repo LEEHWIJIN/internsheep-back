@@ -5,6 +5,7 @@ require('./db/database_config') //connect db
 const std = require('./routes/std')
 //const coMypage = require('./routes/coMypage')
 const mypage = require('./routes/mypage')
+const admin = require('./routes/admin')
 const app = express()
 
 app.use((req, res, next) =>{
@@ -21,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/std', std)
 //app.use('/co/mypage', coMypage)
 app.use('/std/mypage', mypage)
+app.use('/admin', admin)
 
 
 module.exports = app
