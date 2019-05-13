@@ -98,12 +98,19 @@ router.post('/resume', function (req, res) {
                 sScore +=  `"database" : `+req.body.database+ `,`
                 sScore += `"network" : `+req.body.network+`}`
 
+            var sEnglish = `{`
+            sEnglish += `"EnglishSearch" : ` + req.body.EnglishSearch + `,`
+            sEnglish += `"EnglishCommunication" : ` + req.body.EnglishCommunication + `,`
+            sEnglish += `"EnglishPresentation" : ` + req.body.EnglishPresentation + `,`
+            sEnglish += `"EnglishReport" : ` + req.body.EnglishReport +`}`
+
             var sPhone = req.body.sPhone
             var sHope = req.body.sHope
-            var sEnglish = req.body.sEnglish
-
-            var sql2 = 'INSERT INTO resume (sID, programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEnglish) VALUES(?,?,?,?,?,?,?,?,?,?)'
-            var params2 = [sID, programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEnglish]
+            var sEmail = req.body.sEmail
+            var sGrade = req.body.sGrade
+            var sHopeTerm = req.body.sHopeTerm
+            var sql2 = 'INSERT INTO resume (sID, programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            var params2 = [sID, programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish]
             conn.init().query(sql2, params2, function (err, rows) {
                 if (err) console.log(err)
                 else {
@@ -210,11 +217,20 @@ router.post('/modifyResume', function (req, res) {
             sScore += `"os" : ` + req.body.os + `,`
             sScore += `"database" : ` + req.body.database + `,`
             sScore += `"network" : ` + req.body.network + `}`
+
+            var sEnglish = `{`
+            sEnglish += `"EnglishSearch" : ` + req.body.EnglishSearch + `,`
+            sEnglish += `"EnglishCommunication" : ` + req.body.EnglishCommunication + `,`
+            sEnglish += `"EnglishPresentation" : ` + req.body.EnglishPresentation + `,`
+            sEnglish += `"EnglishReport" : ` + req.body.EnglishReport +`}`
+
             var sPhone = req.body.sPhone
             var sHope = req.body.sHope
-            var sEnglish = req.body.sEnglish
-            var sql2 = 'UPDATE resume SET programmingLang = ?, frameworkLang=?, databaseLang=?, cloudLang=?, machineLang=?, sScore=?, sPhone=?, sHope=?, sEnglish=? WHERE sID = ?'
-            var params = [programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEnglish, sID]
+            var sEmail = req.body.sEmail
+            var sGrade = req.body.sGrade
+            var sHopeTerm = req.body.sHopeTerm
+            var sql2 = 'UPDATE resume SET programmingLang = ?, frameworkLang=?, databaseLang=?, cloudLang=?, machineLang=?, sScore=?, sPhone=?, sHope=?, sEmail=?, sGrade=?, sHopeTerm=?,sEnglish=? WHERE sID = ?'
+            var params = [programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish, sID]
 
             conn.init().query(sql2, params, function (err, rows) {
                 if (err) console.log(err)
