@@ -6,7 +6,7 @@ const std = require('./routes/std')
 const mypage = require('./routes/mypage')
 const auth = require('./routes/auth')
 const checktoken = require('./middle/checktoken')
-
+const coMypage = require('./routes/coMypage')
 const app = express()
 
 app.use((req, res, next) =>{
@@ -30,6 +30,8 @@ app.get('/', (req, res)=>{
 
 app.use('/std/auth', auth)
 app.use('/std', std)
+app.use('/co/mypage', coMypage)
 app.use('/std/mypage', mypage)
+app.user('/co/mypage', coMypage)
 
 module.exports = app
