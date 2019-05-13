@@ -287,7 +287,7 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT cName, sName, YN FROM studentApplyCompany'
+    var sql = 'SELECT cName, YN FROM studentApplyCompany'
     conn.init().query(sql, function (err, rows) {
         var responseData = []
         if (err) console.log(err)
