@@ -69,6 +69,9 @@ router.get('/showApplyNotice', function(req, res){
                 console.log(rows)
                 res.send(rows)
             }
+        }
+    })
+})
 
 router.post('/writeNotice', function(req, res){
     var cName = req.body.cName
@@ -144,6 +147,7 @@ router.put('/modifyNotice', function(req, res){
             }
         }
     })
+})
 
 router.get('/watchApplyStd', function(req, res) {
 
