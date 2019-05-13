@@ -287,20 +287,15 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT cName, YN FROM studentApplyCompany'
-    conn.init().query(sql, function (err, rows) {
-        var responseData = []
+    var sql = 'SELECT cName, YN, cImage FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student WHERE sLoginID = ?'
+    var sLoginID = req.body.sLoginID
+    conn.init().query(sql, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
-            for (var i = 0; i < rows.length; i++) {
-                if (rows[i].sName == req.query.sName) {
-                    responseData[0] = rows[i]
-                }
-            }
-            if (responseData[0] == null) {
+            if (rows == null) {
                 return res.send(false)
             } else {
-                return res.json(responseData)
+                return res.json(rows)
             }
         }
     })
