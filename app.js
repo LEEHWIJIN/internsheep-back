@@ -32,7 +32,7 @@ app.use('/std/auth', auth)
 app.use('/std', std)
 app.use('/std/mypage', mypage)
 app.use('/co/mypage', coMypage)
-app.user('/co/mypage', coMypage)
+// app.user('/co/mypage', coMypage)
 
 
 module.exports = app
