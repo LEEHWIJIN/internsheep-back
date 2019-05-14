@@ -8,7 +8,7 @@ router.post('/applyNotice', function(req, res) {
     Promise.resolve()
         .then(getApplyTermID)
         .then(getcNoticeID)
-        .then(applyNoticeID)
+        .then(applyNotice)
         .catch(function (err) {
             console.log('Error', err)
             process.exit()
@@ -67,9 +67,9 @@ router.post('/applyNotice', function(req, res) {
         })  
     }
 
-    function applyNoticeID(params) {
+    function applyNotice(params) {
         console.log(params)
-        var sql = 'INSERT INTO applyNotice (cNoticeID, applyTermID, cStatus) VALUES(?,?,0)'
+        var sql = 'INSERT INTO applyNotice (cNoticeID, applyTermID, cStatus, applyStdNum) VALUES(?,?,0,0)'
         return new Promise(function (resolve, reject) {
             if (params[0]==0 && params[1]==0)
                 resolve(0)
@@ -103,8 +103,8 @@ router.get('/showApplyNotice', function(req, res){
 
     function getApplyTermID() {
         var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
-        var semester = req.body.applySemester
-        var order = req.body.applyOrder
+        var semester = req.query.applySemester
+        var order = req.query.applyOrder
         var sqlParams = [semester,order]
 
         return new Promise(function (resolve, reject) {
@@ -132,7 +132,7 @@ router.get('/showApplyNotice', function(req, res){
             resolve(params)
         }
         var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?"
-        var cName = req.body.cName
+        var cName = req.query.cName
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cName, function (err, rows) {
                 if (err) reject(err)
