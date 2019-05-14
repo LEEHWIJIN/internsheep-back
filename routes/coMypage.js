@@ -15,50 +15,54 @@ router.get('/watchApplyStd', function(req, res) {
         })
 
     function firstSql() {
-        var sql = 'SELECT* FROM studentApplyCompany WHERE cName = ?'
+        var sql = 'SELECT * FROM company, companyNotice WHERE comapany.cID = companyNotice.cID AND cName = ?'
         var cName = req.query.cName
-        var sNames = []
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cName, function (err, rows) {
                 if (err) reject(err)
                 else {
-                    for (var i = 0; i < rows.length; i++) {
-                        sNames[i] = rows[i].sName
-                    }
-                    resolve(sNames)
+                    if(rows.length == 0)
+                        res.send('공고가 없음')
+                    else
+                        resolve(rows[0].cNoticeID)
                 }
             })
         })
     }
 
-    function secondSql(sNames) {
-        var sql='SELECT* FROM resume WHERE sName = ?'
-        var count = 0
-        console.log(sNames.length)
-
-        for (var i = 
-            0; i < sNames.length; i++) {
-            if (count == 0) {
-                count++
-                continue
-            }
-            else {
-                sql += ' union '
-                sql += 'SELECT* FROM resume WHERE sName = ?'
-            }
-        }
+    function secondSql(cNoticeID) {
+        var sql='SELECT* FROM applyNotice WHERE cNoticeId = ? '
 
         return new Promise(function (resolve, reject) {
-            console.log(sql)
-            console.log(sNames)
-            conn.init().query(sql, sNames, function (err, rows) {
-                if(sNames.length == 0)
-                    res.send('no result')
-                else if (err) reject(err)
+            conn.init().query(sql, cNoticeID, function (err, rows) {
+                if (err) reject(err)
                 else {
-                    res.json(rows)
-                    console.log(rows)
-                    resolve(rows)
+                    if(rows.length == 0)
+                        res.send('공고 신청을 하지 않았음')
+                    else
+                    {
+                        console.log(rows)
+                        resolve(rows[0].applyNoticeID)    
+                    }
+                }
+            })
+        })
+    }
+
+    function getApplyStd(applyNoticeID)
+    {
+        var sql = 'SELECT * FROM studentApplyCo WHERE applyNoticeID = ?'
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, applyNoticeID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    if(rows.length == 0)
+                        res.send('신청한 학생이 없음')
+                    else
+                    {
+                        console.log(rows[0].sID)
+                        resolve(rows[0].sID)    
+                    }
                 }
             })
         })
