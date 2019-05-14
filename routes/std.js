@@ -11,6 +11,7 @@ router.get('/list', function(req, res){
         var responseData= []
         if(err) console.log(err)
         else {
+            console.log(rows)
             for (var i = 0; i < rows.length; i++) {
                 responseData[i] = rows[i]
             }
