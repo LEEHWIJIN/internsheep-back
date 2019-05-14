@@ -17,7 +17,10 @@ router.get('/checkNotice', function(req,res)
             if(rows.length == 0)
                 res.send('0')
             else
-                res.send('1')                                 
+                res.send('1')
+        }
+    })
+})                                 
 
 router.post('/applyNotice', function(req, res) {
 
@@ -184,6 +187,7 @@ router.get('/showApplyNotice', function(req, res){
     var moSql = 'UPDATE companyNotice SET cBenefit=?, cPay=?, internTermStart=?, internTermEnd=?, cOccupation=?, cNumOfPeople=?, cTag=? WHERE cNoticeID = ?'
     var getSql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?'
     conn.init().query(getSql, cName, function(err, rows)
+    {
     Promise.resolve()
         .then(getApplyTermID)
         .then(getcNoticeID)
@@ -280,6 +284,8 @@ router.get('/showApplyNotice', function(req, res){
             }
         })
     }
+
+    })
 })
 
 
