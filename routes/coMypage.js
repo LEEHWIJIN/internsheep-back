@@ -4,6 +4,7 @@ const mysql = require('../db/database_config.js')
 var conn = mysql()
 
 
+
 router.get('/checkNotice', function(req,res)
 {
     var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
@@ -61,7 +62,6 @@ router.post('/applyNotice', function(req, res) {
         {
             var params = [0,0]
             resolve(params)
-
         }
         var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?"
         var cName = req.body.cName
@@ -173,21 +173,7 @@ router.get('/watchNotice', function(req, res){
     })
 })
 
-
 router.get('/showApplyNotice', function(req, res){
-
-    var benefit = req.body.cBenefit
-    var pay = req.body.cPay
-    var internTermStart = req.body.internTermStart
-    var internTermEnd = req.body.internTermEnd
-    var occupation = req.body.cOccupation
-    var numOfPeople = req.body.cNumOfPeople
-    var tag = req.body.cTag
-
-    var moSql = 'UPDATE companyNotice SET cBenefit=?, cPay=?, internTermStart=?, internTermEnd=?, cOccupation=?, cNumOfPeople=?, cTag=? WHERE cNoticeID = ?'
-    var getSql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?'
-    conn.init().query(getSql, cName, function(err, rows)
-    {
     Promise.resolve()
         .then(getApplyTermID)
         .then(getcNoticeID)
@@ -224,19 +210,6 @@ router.get('/showApplyNotice', function(req, res){
     {
         if (!applyTermID)
         {
-            console.log(rows)
-            
-            var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, rows[0].cNoticeID]
-
-            conn.init().query(moSql, params, function(err, rows)
-            {
-                if(err) console.log(err)
-                else
-                {
-                    console.log(rows)
-                    res.send(rows)
-                }
-            })
             var params = [0,0]
             resolve(params)
         }
