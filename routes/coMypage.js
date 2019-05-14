@@ -4,27 +4,58 @@ const mysql = require('../db/database_config.js')
 var conn = mysql()
 
 router.post('/writeNotice', function(req, res){
-    var cName = req.body.cName
-    var cManagerName = req.body.cManagerName
-    var sql = 'INSERT INTO companyNotice (cName, cManagerName) VALUES(?,?)'
-    var params = [cName, cManagerName]
 
-    conn.init().query(sql, params, function(err, rows)
+    Promise.resolve()
+        .then(getCompanyNotice)
+        .then(writeCompanyNotice)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function getCompanyNotice() {
+        var sql = 'SELECT* FROM company WHERE cName = ?'
+        var cName = req.body.cName
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cName, function (err, rows) {
+                if (err) reject(err)
+                else
+                {
+                    console.log(rows.cID)
+                    resolve(rows[0].cID)
+                }
+            })
+        })
+    }    
+    function writeCompanyNotice(cID) 
     {
-        if(err) console.log(err)
-        else
-        {
-            console.log(rows)
-            res.send(rows)
-        }
-    })
+        var benefit = req.body.cBenefit
+        var pay = req.body.cPay
+        var internTermStart = req.body.internTermStart
+        var internTermEnd = req.body.internTermEnd
+        var occupation = req.body.cOccupation
+        var numOfPeople = req.body.cNumOfPeople
+        var tag = req.body.cTag
+    
+        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag) VALUES(?,?,?,?,?,?,?,?)'
+        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag]
+    
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, params, function (err, rows) {
+                if (err) reject(err)
+                else {
+                        console.log(rows)
+                        res.send(rows)
+                        resolve(0)
+                }
+            })
+        })
+    }
 })
 
 router.get('/watchNotice', function(req, res){
-    var cName = req.body.cName
-    var sql = 'SELECT * FROM companyNotice where cName = ?'; 
-    
-
+    var cName = req.query.cName
+    var sql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?'
     conn.init().query(sql, cName, function(err, rows)
     {
         console.log(cName)
@@ -40,43 +71,37 @@ router.get('/watchNotice', function(req, res){
 router.put('/modifyNotice', function(req, res){
     var cName = req.body.cName
 
-    var getSql = 'SELECT * FROM companyNotice where cName = ?'
-    var moSql = 'UPDATE companyNotice SET cName=?, cManagerName=? WHERE cNoticeID = ?'
+    var benefit = req.body.cBenefit
+    var pay = req.body.cPay
+    var internTermStart = req.body.internTermStart
+    var internTermEnd = req.body.internTermEnd
+    var occupation = req.body.cOccupation
+    var numOfPeople = req.body.cNumOfPeople
+    var tag = req.body.cTag
 
-
+    var moSql = 'UPDATE companyNotice SET cBenefit=?, cPay=?, internTermStart=?, internTermEnd=?, cOccupation=?, cNumOfPeople=?, cTag=? WHERE cNoticeID = ?'
+    var getSql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?'
     conn.init().query(getSql, cName, function(err, rows)
     {
         if(err) console.log(err)
         else
         {
-            if(!rows[0])
+            console.log(rows)
+            
+            var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, rows[0].cNoticeID]
+
+            conn.init().query(moSql, params, function(err, rows)
             {
-                console.log('no result')
-                res.send(rows)
-            }
-            else
-            {
-                var cNoticeID
-                var cMoName = req.body.cMoName
-                var cMoManagerName = req.body.cMoManagerName
-                console.log(rows[0])
-                cNoticeID = rows[0].cNoticeID
-                console.log(cNoticeID)
-                var params = [cMoName, cMoManagerName, cNoticeID]
-                
-                conn.init().query(moSql, params, function(err, rows)
+                if(err) console.log(err)
+                else
                 {
-                
-                    if(err) console.log(err)
-                    else
-                    {
-                        console.log(rows)
-                        res.send(rows)
-                    }
-                })
-            }
+                    console.log(rows)
+                    res.send(rows)
+                }
+            })
         }
     })
+})
 
 router.get('/watchApplyStd', function(req, res) {
 

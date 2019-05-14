@@ -21,6 +21,5 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/std', std)
 app.use('/co/mypage', coMypage)
 app.use('/std/mypage', mypage)
-app.user('/co/mypage', coMypage)
 
 module.exports = app
