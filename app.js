@@ -34,6 +34,4 @@ app.use('/std/mypage', mypage)
 app.use('/co/mypage', coMypage)
 
 
-
-
 module.exports = app
