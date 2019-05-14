@@ -19,7 +19,6 @@ router.post('/applyNotice', function(req, res) {
         var semester = req.body.applySemester
         var order = req.body.applyOrder
         var sqlParams = [semester,order]
-
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
@@ -179,5 +178,97 @@ router.get('/showApplyNotice', function(req, res){
 })
 
 
-        
+
+
+router.post('/postApplyStd', function(req, res){
+    var sql = 'UPDATE stdApplyCo SET YN = ? WHERE sName = ?'
+    var sName = req.body.sName
+    var YN = req.body.YN
+    var params = [YN, sName]
+    conn.init().query(sql, params, function(err, rows){
+        if(err) console.log(err)
+        else {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
+router.get('/showStdAttendence', function(req, res) {
+
+    Promise.resolve()
+        .then(findcNoticeID)
+        .then(findApplyNoticeID)
+        .then(findStudentApplyCompanyID)
+        .then(findAttendence)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function findcNoticeID() {
+        var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
+        var cName = req.query.cName
+
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cName, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    resolve(rows[0].cNoticeID)
+                }
+            })
+        })
+    }
+
+    function findApplyNoticeID(cNoticeID) {
+        var sql='SELECT* FROM applyTerm, applyNotice WHERE applyTerm.applyTermID = applyNotice.applyTermID AND cNoticeID = ? AND applySemester = ?'
+        var applySemester = req.query.applySemester
+        var sqlParams = [cNoticeID, applySemester]
+
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    resolve(rows[0].applyNoticeID)
+                }
+            })
+        })
+    }
+
+    function findStudentApplyCompanyID(applyNoticeID) {
+        var sql='SELECT * FROM stdApplyCo, student WHERE stdApplyCo.sID = student.sID AND applyNoticeID = ? AND sName = ? AND YN = 1'
+        var sName = req.query.sName
+        var sqlParams = [applyNoticeID, sName]
+
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    resolve(rows[0].stdApplyCoID)
+                }
+            })
+        })
+    }
+
+    function findAttendence(stdApplyCoID) {
+        var sql='SELECT* FROM internDetail WHERE stdApplyCoID = ?'
+
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, stdApplyCoID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    res.json(rows)
+                    resolve(rows[0].attendence)
+                }
+            })
+        })
+    }
+    
+
+})
+
 module.exports = router
