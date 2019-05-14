@@ -232,6 +232,7 @@ router.post('/applyCo', function (req, res) {
         .then(first)
         .then(second)
         .then(three)
+        .then(four)
         .catch(function (err) {
             console.log('Error', err)
             process.exit()
@@ -254,13 +255,14 @@ router.post('/applyCo', function (req, res) {
     }
 
     function second(data) {
-        var sql2 = 'SELECT applyNoticeID FROM applyNotice NATURAL JOIN companyNotice NATURAL JOIN company WHERE cName = ?'
-        var params2 = [req.body.cName]
+        var sql2 = 'SELECT applyNoticeID, applyStdNum FROM applyNotice NATURAL JOIN companyNotice NATURAL JOIN company NATURAL JOIN applyTerm WHERE cName = ? and applySemester = ? and applyOrder =?'
+        var params2 = [req.body.cName, req.body.applySemester, req.body.applyOrder]
         return new Promise(function (resolve,reject) {
             conn.init().query(sql2,params2, function (err, rows) {
                 if(err) console.log(err)
                 else{
                     data[1] = rows[0].applyNoticeID
+                    data[2] = rows[0].applyStdNum
                     console.log(data)
                     resolve(data)
                 }
@@ -278,10 +280,26 @@ router.post('/applyCo', function (req, res) {
         conn.init().query(sql3, params3, function (err, rows) {
             if (err) console.log(err)
             else {
+                console.data
                 res.send(rows)
-                resolve(rows)
+                resolve(data)
             }
         })
+        })
+    }
+    function four(data) {
+        return new Promise(function (resolve,reject) {
+            var sql4 = 'UPDATE applyNotice SET applyStdNum = ? WHERE applyNoticeID = ?'
+            var applyStdNum =  data[2] + 1
+            var applyNoticeID =  data[1]
+            var params4 = [applyStdNum, applyNoticeID]
+
+            conn.init().query(sql4, params4, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    resolve(rows)
+                }
+            })
         })
     }
 })
