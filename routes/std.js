@@ -5,11 +5,13 @@ var conn = mysql()
 
 
 router.get('/list', function(req, res){
-    var sql = 'SELECT * FROM companyNotice'
-    conn.init().query(sql,function(err, rows){
+    var sql = 'SELECT * FROM applyNotice NATURAL JOIN applyTerm WHERE applySemester =? and applyOrder =?'
+    var params = [req.body.applySemester, req.body.applyOrder]
+    conn.init().query(sql,params,function(err, rows){
         var responseData= []
         if(err) console.log(err)
         else {
+            console.log(rows)
             for (var i = 0; i < rows.length; i++) {
                 responseData[i] = rows[i]
             }
