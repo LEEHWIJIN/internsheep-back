@@ -22,7 +22,6 @@ router.get('/checkNotice', function(req,res)
 })
 
 router.post('/writeNotice', function(req, res){
-
     Promise.resolve()
         .then(getCompanyNotice)
         .then(writeCompanyNotice)
