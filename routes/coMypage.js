@@ -3,6 +3,24 @@ const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
 
+router.get('/checkNotice', function(req,res)
+{
+    var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
+    var cName = req.query.cName
+    conn.init().query(sql, cName, function(err, rows)
+    {
+        if(err)res.send(err)
+        else 
+        {
+            console.log(rows)
+            if(rows.length == 0)
+                res.send('0')
+            else
+                res.send('1')                                 
+        }
+    })
+})
+
 router.post('/writeNotice', function(req, res){
 
     Promise.resolve()
