@@ -112,6 +112,7 @@ router.post('/applyNotice', function(req, res) {
 router.post('/writeNotice', function(req, res){
     Promise.resolve()
         .then(getCompanyNotice)
+        .then(writeLocation)
         .then(writeCompanyNotice)
         .catch(function (err) {
             console.log('Error', err)
@@ -131,8 +132,24 @@ router.post('/writeNotice', function(req, res){
                 }
             })
         })
+    }    
+    function writeLocation (cID)
+    {
+        var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
+        var location = req.body.cLocation
+        var sqlParams = [location, cID]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else
+                {
+                    console.log(rows)
+                    resolve(cID)
+                }
+            })
+        })
     }
-    function writeCompanyNotice(cID)
+    function writeCompanyNotice(cID) 
     {
         var benefit = req.body.cBenefit
         var pay = req.body.cPay
@@ -171,6 +188,73 @@ router.get('/watchNotice', function(req, res){
             res.send(rows)
         }
     })
+})
+
+router.post('/modifyNotice', function(req, res)
+{
+    Promise.resolve()
+    .then(getCompanyNotice)
+    .then(writeLocation)
+    .then(writeCompanyNotice)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
+    })
+
+    function getCompanyNotice() {
+        var sql = 'SELECT* FROM company WHERE cName = ?'
+        var cName = req.body.cName
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cName, function (err, rows) {
+                if (err) reject(err)
+                else
+                {
+                    console.log(rows.cID)
+                    resolve(rows[0].cID)
+                }
+            })
+        })
+    }    
+    function writeLocation (cID)
+    {
+        var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
+        var location = req.body.cLocation
+        var sqlParams = [location, cID]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else
+                {
+                    console.log(rows)
+                    resolve(cID)
+                }
+            })
+        })
+    }
+    function writeCompanyNotice(cID) 
+    {
+        var benefit = req.body.cBenefit
+        var pay = req.body.cPay
+        var internTermStart = req.body.internTermStart
+        var internTermEnd = req.body.internTermEnd
+        var occupation = req.body.cOccupation
+        var numOfPeople = req.body.cNumOfPeople
+        var tag = req.body.cTag
+    
+        var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
+        var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
+    
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, params, function (err, rows) {
+                if (err) reject(err)
+                else {
+                        console.log(rows)
+                        res.send(rows)
+                        resolve(0)
+                }
+            })
+        })
+    }
 })
 
 router.get('/showApplyNotice', function(req, res){
@@ -259,7 +343,6 @@ router.get('/showApplyNotice', function(req, res){
     }
 
 })
-
 
 
 
