@@ -4,6 +4,7 @@ const path = require('path')
 require('./db/database_config') //connect db
 const std = require('./routes/std')
 const mypage = require('./routes/mypage')
+const admin = require('./routes/admin')
 const auth = require('./routes/auth')
 const checktoken = require('./middle/checktoken')
 const coMypage = require('./routes/coMypage')
@@ -28,11 +29,11 @@ app.get('/', (req, res)=>{
 })
 
 
-app.use('/std/auth', auth)
+app.use('/auth', auth)
 app.use('/std', std)
 app.use('/std/mypage', mypage)
+app.use('/admin', admin)
 app.use('/co/mypage', coMypage)
-// app.user('/co/mypage', coMypage)
 
 
 module.exports = app
