@@ -12,7 +12,7 @@ router.get('/checkNotice', function(req,res)
     conn.init().query(sql, cName, function(err, rows)
     {
         if(err)res.send(err)
-        else 
+        else
         {
             console.log(rows)
             if(rows.length == 0)
@@ -21,7 +21,7 @@ router.get('/checkNotice', function(req,res)
                 res.send('1')
         }
     })
-})                                 
+})
 
 router.post('/applyNotice', function(req, res) {
 
@@ -84,7 +84,7 @@ router.post('/applyNotice', function(req, res) {
                     }
                 }
             })
-        })  
+        })
     }
 
     function applyNotice(params) {
@@ -95,8 +95,8 @@ router.post('/applyNotice', function(req, res) {
                 resolve(0)
             else
             {
-                conn.init().query(sql, params, function (err, rows)    
-                {   
+                conn.init().query(sql, params, function (err, rows)
+                {
                     if (err) reject(err)
                     else {
                         console.log(rows)
@@ -131,8 +131,8 @@ router.post('/writeNotice', function(req, res){
                 }
             })
         })
-    }    
-    function writeCompanyNotice(cID) 
+    }
+    function writeCompanyNotice(cID)
     {
         var benefit = req.body.cBenefit
         var pay = req.body.cPay
@@ -141,10 +141,10 @@ router.post('/writeNotice', function(req, res){
         var occupation = req.body.cOccupation
         var numOfPeople = req.body.cNumOfPeople
         var tag = req.body.cTag
-    
+
         var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag) VALUES(?,?,?,?,?,?,?,?)'
         var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag]
-    
+
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
@@ -234,10 +234,10 @@ router.get('/showApplyNotice', function(req, res){
                     }
                 }
             })
-        })  
+        })
     }
 
-    function showNoticeID(params) 
+    function showNoticeID(params)
     {
         console.log(params)
         var sql = 'SELECT*FROM applyNotice WHERE cNoticeID = ? AND applyTermID = ?'
@@ -246,8 +246,8 @@ router.get('/showApplyNotice', function(req, res){
                 resolve(0)
             else
             {
-                conn.init().query(sql, params, function (err, rows)    
-                {   
+                conn.init().query(sql, params, function (err, rows)
+                {
                     if (err) reject(err)
                     else {
                         console.log(rows)
@@ -259,7 +259,7 @@ router.get('/showApplyNotice', function(req, res){
     }
 
     })
-})
+
 
 
 
@@ -351,7 +351,7 @@ router.get('/showStdAttendence', function(req, res) {
             })
         })
     }
-    
+
 
 })
 
