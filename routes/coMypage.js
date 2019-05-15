@@ -9,13 +9,15 @@ router.get('/watchApplyStd', function(req, res) {
     Promise.resolve()
         .then(firstSql)
         .then(secondSql)
+        .then(getApplyStd)
+        .then(showResumeYN)
         .catch(function (err) {
             console.log('Error', err)
             process.exit()
         })
 
     function firstSql() {
-        var sql = 'SELECT * FROM company, companyNotice WHERE comapany.cID = companyNotice.cID AND cName = ?'
+        var sql = 'SELECT * FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
         var cName = req.query.cName
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cName, function (err, rows) {
@@ -51,7 +53,7 @@ router.get('/watchApplyStd', function(req, res) {
 
     function getApplyStd(applyNoticeID)
     {
-        var sql = 'SELECT * FROM studentApplyCo WHERE applyNoticeID = ?'
+        var sql = 'SELECT * FROM stdApplyCo WHERE applyNoticeID = ?'
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, applyNoticeID, function (err, rows) {
                 if (err) reject(err)
@@ -60,9 +62,37 @@ router.get('/watchApplyStd', function(req, res) {
                         res.send('신청한 학생이 없음')
                     else
                     {
-                        console.log(rows[0].sID)
-                        resolve(rows[0].sID)    
+                        console.log(rows) 
+                        resolve(rows)    
                     }
+                }
+            })
+        })
+    }
+    
+    function showResumeYN(resolvedRows)
+    {
+        console.log(resolvedRows)
+        var sql = 'SELECT * FROM resume, stdApplyCo WHERE resume.sID = stdApplyCo.sID AND stdApplyCoID = ?'
+        var sIDs = new Array()
+        sIDs[0] = resolvedRows[0].stdApplyCoID
+        var index = 1
+        console.log(sIDs)
+        for (var i = 0; i < resolvedRows.length-1; i++) {
+            sql += ' UNION '
+            sql += 'SELECT * FROM resume, stdApplyCo WHERE resume.sID = stdApplyCo.sID AND stdApplyCoID = ?'
+            sIDs[index] = resolvedRows[index].stdApplyCoID
+            console.log(sIDs[index])
+            index++;
+        }
+
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sIDs, function (err, rows) {
+                if (err) reject(err)
+                else 
+                {
+                    console.log(rows)
+                    res.json(rows)
                 }
             })
         })
