@@ -7,7 +7,7 @@ var conn = mysql()
 
 router.get('/checkNotice', function(req,res)
 {
-    var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cLoginID = ?'
+    var sql = 'SELECT * FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cLoginID = ?'
     var cLoginID = req.query.cLoginID
     conn.init().query(sql, cLoginID, function(err, rows)
     {
@@ -100,7 +100,7 @@ router.post('/applyNotice', function(req, res) {
                     if (err) reject(err)
                     else {
                         console.log(rows)
-                        res.send(rows)
+                        res.send(1)
                     }
                 })
             }
@@ -108,6 +108,93 @@ router.post('/applyNotice', function(req, res) {
     }
 })
 
+router.get('/checkApplyNotice', function(req, res)
+{
+    Promise.resolve()
+        .then(getApplyTermID)
+        .then(getcNoticeID)
+        .then(applyNotice)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function getApplyTermID() {
+        var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
+        var semester = req.query.applySemester
+        var order = req.query.applyOrder
+        var sqlParams = [semester,order]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    if (rows.length==0)
+                    {
+                        res.send('신청할 수 없음')
+                    }
+                    else
+                    {
+                        resolve(rows[0].applyTermID)
+                    }
+                }
+            })
+        })
+    }
+    function getcNoticeID(applyTermID)
+    {
+        if (!applyTermID)
+        {
+            var params = [0,0]
+            resolve(params)
+        }
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.query.cLoginID
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    if (rows.length==0)
+                    {
+                        res.send('공고가 없음')
+                        var params = [0,0]
+                        resolve(params)
+                    }
+                    else
+                    {
+                        console.log(rows)
+                        var params =[rows[0].cNoticeID, applyTermID]
+                        console.log(params)
+                        resolve(params)
+                    }
+                }
+            })
+        })
+    }
+
+    function applyNotice(params) {
+        console.log(params)
+        var sql = 'SELECT * FROM applyNotice WHERE cNoticeID = ? AND applyTermID = ?'
+        return new Promise(function (resolve, reject) {
+            if (params[0]==0 && params[1]==0)
+                resolve(0)
+            else
+            {
+                conn.init().query(sql, params, function (err, rows)
+                {
+                    if (err) reject(err)
+                    else {
+                        console.log(rows)
+                        if(rows.length == 0)
+                            res.send('0')
+                        else    
+                            res.send('1')
+                    }
+                })
+            }
+        })
+    }
+})
 
 router.post('/writeNotice', function(req, res){
     Promise.resolve()
@@ -158,16 +245,17 @@ router.post('/writeNotice', function(req, res){
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
+        var info = req.body.data.cInfo
 
-        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag) VALUES(?,?,?,?,?,?,?,?)'
-        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag]
+        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag, cInfo) VALUES(?,?,?,?,?,?,?,?,?)'
+        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, info]
 
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
                         console.log(rows)
-                        res.send(rows)
+                        res.send(1)
                         resolve(0)
                 }
             })
@@ -249,7 +337,7 @@ router.post('/modifyNotice', function(req, res)
                 if (err) reject(err)
                 else {
                         console.log(rows)
-                        res.send(rows)
+                        res.send(1)
                         resolve(0)
                 }
             })
@@ -532,7 +620,7 @@ router.post('/changeYNApplyStd', function(req, res)
         if(err) console.log(err)
         else {
             console.log(rows)
-            res.send(rows)
+            res.send(1)
         }
     })
 })
