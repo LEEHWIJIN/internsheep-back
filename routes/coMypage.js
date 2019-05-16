@@ -440,6 +440,7 @@ router.get('/watchApplyStd', function(req, res) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
+                    console.log(rows)
                     if(rows.length == 0)
                         res.send('공고가 없음')
                     else
@@ -490,14 +491,14 @@ router.get('/watchApplyStd', function(req, res) {
     function showResumeYN(resolvedRows)
     {
         console.log(resolvedRows)
-        var sql = 'SELECT * FROM resume, stdApplyCo WHERE resume.sID = stdApplyCo.sID AND stdApplyCoID = ?'
+        var sql = 'SELECT * FROM resume, student, stdApplyCo WHERE resume.sID = stdApplyCo.sID AND student.sID = stdApplyCo.sID AND stdApplyCoID = ?'
         var sIDs = new Array()
         sIDs[0] = resolvedRows[0].stdApplyCoID
         var index = 1
         console.log(sIDs)
         for (var i = 0; i < resolvedRows.length-1; i++) {
             sql += ' UNION '
-            sql += 'SELECT * FROM resume, stdApplyCo WHERE resume.sID = stdApplyCo.sID AND stdApplyCoID = ?'
+            sql += 'SELECT * FROM resume, student, stdApplyCo WHERE resume.sID = stdApplyCo.sID AND student.sID = stdApplyCo.sID AND stdApplyCoID = ?'
             sIDs[index] = resolvedRows[index].stdApplyCoID
             console.log(sIDs[index])
             index++;
@@ -521,7 +522,8 @@ router.get('/watchApplyStd', function(req, res) {
 
 
 
-router.post('/changeYNApplyStd', function(req, res){
+router.post('/changeYNApplyStd', function(req, res)
+{
     var sql = 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
     var applyCoID = req.body.data.stdApplyCoID
     var YN = req.body.data.YN
