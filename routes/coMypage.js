@@ -541,4 +541,10 @@ router.post('/changeYNApplyStd', function(req, res)
 
 
 
+router.get('/showCompanyInfo', function(req, res)
+{
+    
+})
+
+
 module.exports = router
