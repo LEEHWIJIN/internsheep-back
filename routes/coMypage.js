@@ -7,9 +7,9 @@ var conn = mysql()
 
 router.get('/checkNotice', function(req,res)
 {
-    var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
-    var cName = req.query.cName
-    conn.init().query(sql, cName, function(err, rows)
+    var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cLoginID = ?'
+    var cLoginID = req.query.cLoginID
+    conn.init().query(sql, cLoginID, function(err, rows)
     {
         if(err)res.send(err)
         else
@@ -36,8 +36,8 @@ router.post('/applyNotice', function(req, res) {
 
     function getApplyTermID() {
         var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
-        var semester = req.body.applySemester
-        var order = req.body.applyOrder
+        var semester = req.body.data.applySemester
+        var order = req.body.data.applyOrder
         var sqlParams = [semester,order]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
@@ -63,10 +63,10 @@ router.post('/applyNotice', function(req, res) {
             var params = [0,0]
             resolve(params)
         }
-        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?"
-        var cName = req.body.cName
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.body.cLoginID
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
                     if (rows.length==0)
@@ -120,10 +120,10 @@ router.post('/writeNotice', function(req, res){
         })
 
     function getCompanyNotice() {
-        var sql = 'SELECT* FROM company WHERE cName = ?'
-        var cName = req.body.cName
+        var sql = 'SELECT* FROM company WHERE cLoginID = ?'
+        var cLoginID = req.body.cLoginID
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else
                 {
@@ -136,7 +136,7 @@ router.post('/writeNotice', function(req, res){
     function writeLocation (cID)
     {
         var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
-        var location = req.body.cLocation
+        var location = req.body.data.cLocation
         var sqlParams = [location, cID]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
@@ -151,13 +151,13 @@ router.post('/writeNotice', function(req, res){
     }
     function writeCompanyNotice(cID) 
     {
-        var benefit = req.body.cBenefit
-        var pay = req.body.cPay
-        var internTermStart = req.body.internTermStart
-        var internTermEnd = req.body.internTermEnd
-        var occupation = req.body.cOccupation
-        var numOfPeople = req.body.cNumOfPeople
-        var tag = req.body.cTag
+        var benefit = req.body.data.cBenefit
+        var pay = req.body.data.cPay
+        var internTermStart = req.body.data.internTermStart
+        var internTermEnd = req.body.data.internTermEnd
+        var occupation = req.body.data.cOccupation
+        var numOfPeople = req.body.data.cNumOfPeople
+        var tag = req.body.data.cTag
 
         var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag) VALUES(?,?,?,?,?,?,?,?)'
         var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag]
@@ -176,11 +176,11 @@ router.post('/writeNotice', function(req, res){
 })
 
 router.get('/watchNotice', function(req, res){
-    var cName = req.query.cName
-    var sql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?'
-    conn.init().query(sql, cName, function(err, rows)
+    var cLoginID = req.query.cLoginID
+    var sql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?'
+    conn.init().query(sql, cLoginID, function(err, rows)
     {
-        console.log(cName)
+        console.log(cLoginID)
         if(err) console.log(err)
         else
         {
@@ -202,10 +202,10 @@ router.post('/modifyNotice', function(req, res)
     })
 
     function getCompanyNotice() {
-        var sql = 'SELECT* FROM company WHERE cName = ?'
-        var cName = req.body.cName
+        var sql = 'SELECT* FROM company WHERE cLoginID = ?'
+        var cLoginID = req.body.cLoginID
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else
                 {
@@ -218,7 +218,7 @@ router.post('/modifyNotice', function(req, res)
     function writeLocation (cID)
     {
         var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
-        var location = req.body.cLocation
+        var location = req.body.data.cLocation
         var sqlParams = [location, cID]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
@@ -233,13 +233,13 @@ router.post('/modifyNotice', function(req, res)
     }
     function writeCompanyNotice(cID) 
     {
-        var benefit = req.body.cBenefit
-        var pay = req.body.cPay
-        var internTermStart = req.body.internTermStart
-        var internTermEnd = req.body.internTermEnd
-        var occupation = req.body.cOccupation
-        var numOfPeople = req.body.cNumOfPeople
-        var tag = req.body.cTag
+        var benefit = req.body.data.cBenefit
+        var pay = req.body.data.cPay
+        var internTermStart = req.body.data.internTermStart
+        var internTermEnd = req.body.data.internTermEnd
+        var occupation = req.body.data.cOccupation
+        var numOfPeople = req.body.data.cNumOfPeople
+        var tag = req.body.data.cTag
     
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
         var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
@@ -297,10 +297,10 @@ router.get('/showApplyNotice', function(req, res){
             var params = [0,0]
             resolve(params)
         }
-        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cName = ?"
-        var cName = req.query.cName
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.query.cLoginID
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
                     if (rows.length==0)
@@ -362,11 +362,11 @@ router.get('/showStdAttendence', function(req, res) {
         })
 
     function findcNoticeID() {
-        var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
-        var cName = req.query.cName
+        var sql = 'SELECT* FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cLoginID = ?'
+        var cLoginID = req.query.cLoginID
 
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
                     console.log(rows)
@@ -434,10 +434,10 @@ router.get('/watchApplyStd', function(req, res) {
         })
 
     function firstSql() {
-        var sql = 'SELECT * FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
-        var cName = req.query.cName
+        var sql = 'SELECT * FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cLoginID = ?'
+        var cLoginID = req.query.cLoginID
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
                     if(rows.length == 0)
@@ -523,8 +523,8 @@ router.get('/watchApplyStd', function(req, res) {
 
 router.post('/changeYNApplyStd', function(req, res){
     var sql = 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
-    var applyCoID = req.body.stdApplyCoID
-    var YN = req.body.YN
+    var applyCoID = req.body.data.stdApplyCoID
+    var YN = req.body.data.YN
     var params = [YN, applyCoID]
     conn.init().query(sql, params, function(err, rows){
         if(err) console.log(err)
