@@ -270,7 +270,7 @@ router.post('/applyCo', function (req, res) {
         })
     }
 
-    function three(data) {
+    function four(data) {
         return new Promise(function (resolve,reject) {
         var sql3 = 'INSERT INTO stdApplyCo (applyNoticeID, YN, sID) VALUES(?,?,?)'
         var sID = data[0]
@@ -280,14 +280,13 @@ router.post('/applyCo', function (req, res) {
         conn.init().query(sql3, params3, function (err, rows) {
             if (err) console.log(err)
             else {
-                console.data
                 res.send(rows)
                 resolve(data)
             }
         })
         })
     }
-    function four(data) {
+    function three(data) {
         return new Promise(function (resolve,reject) {
             var sql4 = 'UPDATE applyNotice SET applyStdNum = ? WHERE applyNoticeID = ?'
             var applyStdNum =  data[2] + 1
