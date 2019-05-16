@@ -543,7 +543,23 @@ router.post('/changeYNApplyStd', function(req, res)
 
 router.get('/showCompanyInfo', function(req, res)
 {
-    
+    var loginID = req.query.cLoginID
+    var sql = 'SELECT * FROM company WHERE cLoginID = ?'
+    conn.init().query(sql, loginID, function(err, rows)
+    {
+        if(err) console.log(err)
+        else 
+        {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
+router.post('/modifyCompanyInfo', function(req, res)
+{
+    var loginID = req.body.cLoginID
+    var sql = 'UPDATE'
 })
 
 
