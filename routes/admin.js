@@ -60,7 +60,6 @@ router.get('/recentApplyTerm', function(req, res){
                 var end = rows[i].applyEnd
                 var diff1 = today - start
                 var diff2 = end - today
-                console.log(diff2)
                 var currDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
                 if (parseInt(diff1 / currDay) >= 0 && parseInt(diff2 / currDay) >= 0) {
                     responseData[count] = rows[i]
