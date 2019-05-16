@@ -426,9 +426,12 @@ router.post('/postStdPickCo', function (req, res) {
 })
 
 router.get('/watchStdPickCo', function (req,res) {
-    var sql = 'SELECT cName, cImage, cOccupation, cTag, applyStdNum FROM student NATURAL JOIN stdPickCo NATURAL JOIN company NATURAL JOIN companyNotice NATURAL JOIN applyNotice WHERE sLoginID = ?'
+    var sql = 'SELECT cName, cImage, cOccupation, cTag, applyStdNum FROM student NATURAL JOIN stdPickCo NATURAL JOIN company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm WHERE sLoginID = ? and applySemester=? and applyOrder =?'
     var sLoginID = req.query.sLoginID
-    conn.init().query(sql, sLoginID, function (err, rows) {
+    var applySemester = req.query.applySemester
+    var applyOrder = req.query.applyOrder
+    var params = [sLoginID, applySemester, applyOrder]
+    conn.init().query(sql, params, function (err, rows) {
         if(err) console.log(err)
         else{
             if(rows[0]==null){
