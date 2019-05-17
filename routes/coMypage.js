@@ -524,8 +524,8 @@ router.get('/watchApplyStd', function(req, res) {
 
     function getApplyTermID() {
         var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
-        var semester = req.query.data.applySemester
-        var order = req.query.data.applyOrder
+        var semester = req.query.applySemester
+        var order = req.query.applyOrder
         var sqlParams = [semester,order]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
