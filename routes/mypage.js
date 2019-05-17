@@ -257,10 +257,12 @@ router.post('/applyCo', function (req, res) {
     function first() {
         var sql1 =  'SELECT sID FROM student WHERE sLoginID = ?'
         var params1 =  [req.body.sLoginID]
+        console.log(req.body.sLoginID)
         return new Promise(function (resolve,reject) {
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else {
+                    console.log(rows)
                     var data = []
                     data[0]=rows[0].sID
                     console.log(data)
@@ -305,7 +307,7 @@ router.post('/applyCo', function (req, res) {
 
 router.get('/applyStatus', function (req, res) {
     var sql = 'SELECT cName, YN, cImage FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student WHERE sLoginID = ?'
-    var sLoginID = req.body.sLoginID
+    var sLoginID = req.query.sLoginID
     conn.init().query(sql, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
