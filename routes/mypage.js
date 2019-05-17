@@ -389,5 +389,37 @@ router.post('/modifyReportAndReview', upload.single('file'), function (req, res)
     }
 })
 
+router.get('/showStudentInfo', function(req, res)
+{
+    var sql = 'SELECT * FROM student WHERE sLogin = ?'
+    var loginID = req.query.sLoginID
+    conn.init().query(sql, loginID, function(err, rows)
+    {
+        if(err)res.send(err)
+        else 
+        {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+router.post('/modifyStudentInfo', function(req, res)
+{
+    var sql = 'UPDATE student SET sNum = ?, sMajor = ? WHERE sLoginID = ?'
+    var loginID = req.body.sLoginID
+    var sNum = req.body.sNum
+    var sMajor = req.body.sMajor
+    var sqlParams = [sNum, sMajor, loginID]
+    conn.init().query(sql, sqlParams, function(err, rows)
+    {
+        if(err)res.send(err)
+        else
+        {
+            console.log(rows)
+            res.send('1')
+        }
+    })
+})
+
 module.exports = router
 
