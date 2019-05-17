@@ -532,13 +532,14 @@ router.get('/watchApplyStd', function(req, res) {
                 if (err) reject(err)
                 else {
                     console.log(rows)
-                if (rows.length==0)
-                {
-                    res.send('기간이 없음')
-                }
-                else
-                {
-                    resolve(rows[0].applyTermID)                       }
+                    if (rows.length==0)
+                    {
+                        res.send('기간이 없음')
+                    }
+                    else
+                    {
+                        resolve(rows[0].applyTermID)                       
+                    }
                 }
             })
         })
