@@ -128,7 +128,7 @@ router.get('/watchResume', function (req, res) {
         if (err) console.log(err)
         else {
             if(rows[0] == null)
-                res.send(0)
+                res.send('0')
             else {
                 return res.json(rows[0])
             }
@@ -244,7 +244,7 @@ router.post('/modifyResume', function (req, res) {
 })
 
 router.post('/applyCo', function (req, res) {
-    var sql = 'INSERT INTO studentApplyCompany (cName, YN, sName) VALUES(?,?,?)'
+    var sql = 'INSERT INTO stdApplyCo (cName, YN, sName) VALUES(?,?,?)'
     var cName = req.body.cName
     var sName = req.body.sName
     var params = [cName, 0, sName]
@@ -258,7 +258,7 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT cName, sName, YN FROM studentApplyCompany'
+    var sql = 'SELECT cName, sName, YN FROM stdApplyCo'
     conn.init().query(sql, function (err, rows) {
         var responseData = []
         if (err) console.log(err)
