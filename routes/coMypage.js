@@ -649,10 +649,10 @@ router.post('/modifyCompanyInfo', function(req, res)
     var loginID = req.body.cLoginID
     var sql = 'UPDATE company SET cManagerName = ?, cManagerPhone = ?, cLocation = ?, cCeoPhone = ? WHERE cLoginID = ?'
      
-    var managerName = req.body.cManagerName
-    var managerPhone = req.body.cManagerPhone
-    var location = req.body.cLocation
-    var ceoPhone = req.body.cCeoPhone
+    var managerName = req.body.data.cManagerName
+    var managerPhone = req.body.data.cManagerPhone
+    var location = req.body.data.datacLocation
+    var ceoPhone = req.body.data.cCeoPhone
     var sqlParams = [managerName, managerPhone, location, ceoPhone, loginID]
     conn.init().query(sql, sqlParams, function(err,rows)
     {
