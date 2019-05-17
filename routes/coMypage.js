@@ -524,8 +524,8 @@ router.get('/watchApplyStd', function(req, res) {
 
     function getApplyTermID() {
         var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
-        var semester = req.body.applySemester
-        var order = req.body.applyOrder
+        var semester = req.query.data.applySemester
+        var order = req.query.data.applyOrder
         var sqlParams = [semester,order]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
@@ -551,7 +551,7 @@ router.get('/watchApplyStd', function(req, res) {
             resolve(params)
         }
         var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
-        var cLoginID = req.body.cLoginID
+        var cLoginID = req.query.cLoginID
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
