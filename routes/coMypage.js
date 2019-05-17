@@ -7,8 +7,9 @@ var conn = mysql()
 router.get('/watchApplyStd', function(req, res) {
 
     Promise.resolve()
-        .then(firstSql)
-        .then(secondSql)
+        .then(getApplyTermID)
+        .then(getcNoticeID)
+        .then(getApplyNoticeID)
         .then(getApplyStd)
         .then(showResumeYN)
         .catch(function (err) {
@@ -16,41 +17,84 @@ router.get('/watchApplyStd', function(req, res) {
             process.exit()
         })
 
-    function firstSql() {
-        var sql = 'SELECT * FROM company, companyNotice WHERE company.cID = companyNotice.cID AND cName = ?'
-        var cName = req.query.cName
+    function getApplyTermID() {
+        var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
+        var semester = req.body.applySemester
+        var order = req.body.applyOrder
+        var sqlParams = [semester,order]
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cName, function (err, rows) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
                 else {
-                    if(rows.length == 0)
-                        res.send('공고가 없음')
-                    else
-                        resolve(rows[0].cNoticeID)
+                    console.log(rows)
+                if (rows.length==0)
+                {
+                    res.send('기간이 없음')
+                }
+                else
+                {
+                    resolve(rows[0].applyTermID)                       }
                 }
             })
         })
     }
-
-    function secondSql(cNoticeID) {
-        var sql='SELECT* FROM applyNotice WHERE cNoticeId = ? '
-
+    function getcNoticeID(applyTermID)
+    {
+        if (!applyTermID)
+        {
+            var params = [0,0]
+            resolve(params)
+        }
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.body.cLoginID
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, cNoticeID, function (err, rows) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
-                    if(rows.length == 0)
-                        res.send('공고 신청을 하지 않았음')
+                    if (rows.length==0)
+                    {
+                        res.send('공고가 없음')
+                        var params = [0,0]
+                        resolve(params)
+                    }
                     else
                     {
                         console.log(rows)
-                        resolve(rows[0].applyNoticeID)    
+                        var params =[rows[0].cNoticeID, applyTermID]
+                        console.log(params)
+                        resolve(params)
                     }
                 }
             })
         })
     }
 
+    function getApplyNoticeID(params) {
+        console.log(params)
+        var sql = 'SELECT * FROM applyNotice WHERE cNoticeID = ? AND applyTermID = ?'
+        return new Promise(function (resolve, reject) {
+            if (params[0]==0 && params[1]==0)
+                resolve(0)
+            else
+            {
+                conn.init().query(sql, params, function (err, rows)
+                {
+                    if (err) reject(err)
+                    else {
+                        if(rows.length == 0)
+                            res.send('공고 신청을 하지 않음')
+                        else
+                        {
+                            console.log(rows)
+                            resolve(rows[0].applyNoticeID)
+                        }
+                    }
+                })
+            }
+        })
+    }
+
+    
     function getApplyStd(applyNoticeID)
     {
         var sql = 'SELECT * FROM stdApplyCo WHERE applyNoticeID = ?'
