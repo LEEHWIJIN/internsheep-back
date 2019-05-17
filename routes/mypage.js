@@ -244,34 +244,75 @@ router.post('/modifyResume', function (req, res) {
 })
 
 router.post('/applyCo', function (req, res) {
-    var sql = 'INSERT INTO stdApplyCo (cName, YN, sName) VALUES(?,?,?)'
-    var cName = req.body.cName
-    var sName = req.body.sName
-    var params = [cName, 0, sName]
 
-    conn.init().query(sql, params, function (err, rows) {
-        if (err) console.log(err)
-        else {
-            res.send(rows)
-        }
-    })
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .then(three)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function first() {
+        var sql1 =  'SELECT sID FROM student WHERE sLoginID = ?'
+        var params1 =  [req.body.sLoginID]
+        return new Promise(function (resolve,reject) {
+            conn.init().query(sql1, params1, function (err,rows) {
+                if(err) console.log(err)
+                else {
+                    var data = []
+                    data[0]=rows[0].sID
+                    console.log(data)
+                    resolve(data)
+                }
+            })
+        })
+    }
+
+    function second(data) {
+        var sql2 = 'SELECT applyNoticeID FROM applyNotice NATURAL JOIN companyNotice NATURAL JOIN company WHERE cName = ?'
+        var params2 = [req.body.cName]
+        return new Promise(function (resolve,reject) {
+            conn.init().query(sql2,params2, function (err, rows) {
+                if(err) console.log(err)
+                else{
+                    data[1] = rows[0].applyNoticeID
+                    console.log(data)
+                    resolve(data)
+                }
+            })
+        })
+    }
+
+    function three(data) {
+        return new Promise(function (resolve,reject) {
+        var sql3 = 'INSERT INTO stdApplyCo (applyNoticeID, YN, sID) VALUES(?,?,?)'
+        var sID = data[0]
+        var applyNoticeID =  data[1]
+        var params3 = [applyNoticeID, 0, sID]
+
+        conn.init().query(sql3, params3, function (err, rows) {
+            if (err) console.log(err)
+            else {
+                res.send(rows)
+                resolve(rows)
+            }
+        })
+        })
+    }
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT cName, sName, YN FROM stdApplyCo'
-    conn.init().query(sql, function (err, rows) {
-        var responseData = []
+    var sql = 'SELECT cName, YN, cImage FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student WHERE sLoginID = ?'
+    var sLoginID = req.body.sLoginID
+    conn.init().query(sql, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
-            for (var i = 0; i < rows.length; i++) {
-                if (rows[i].sName == req.query.sName) {
-                    responseData[0] = rows[i]
-                }
-            }
-            if (responseData[0] == null) {
+            if (rows == null) {
                 return res.send(false)
             } else {
-                return res.json(responseData)
+                return res.json(rows)
             }
         }
     })
