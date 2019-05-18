@@ -100,7 +100,7 @@ router.post('/applyNotice', function(req, res) {
                     if (err) reject(err)
                     else {
                         console.log(rows)
-                        res.send(1)
+                        res.send('1')
                     }
                 })
             }
@@ -255,7 +255,7 @@ router.post('/writeNotice', function(req, res){
                 if (err) reject(err)
                 else {
                         console.log(rows)
-                        res.send(1)
+                        res.send('1')
                         resolve(0)
                 }
             })
@@ -337,7 +337,7 @@ router.post('/modifyNotice', function(req, res)
                 if (err) reject(err)
                 else {
                         console.log(rows)
-                        res.send(1)
+                        res.send('1')
                         resolve(0)
                 }
             })
@@ -690,7 +690,7 @@ router.get('/watchApplyStdNum', function(req, res) {
             var params = [0,0]
             resolve(params)
         }
-        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID"
         var cLoginID = req.query.cLoginID
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
