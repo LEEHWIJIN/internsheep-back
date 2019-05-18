@@ -283,7 +283,6 @@ router.post('/applyCo', function (req, res) {
         var params2 = [req.body.cName]
         return new Promise(function (resolve,reject) {
             if(data == '0'){
-                console.log('뀨ㅠㅠ유유유')
                 resolve('0')
             }
             else {
