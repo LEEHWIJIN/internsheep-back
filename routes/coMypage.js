@@ -330,10 +330,10 @@ router.post('/modifyNotice', function(req, res)
     {
         var benefit = req.body.data.cBenefit
         var pay = req.body.data.cPay
-        var start = req.body.data.internTermStart.split('.')
-        var end = req.body.data.internTermEnd.split('.')
+        var start = req.body.data.internTermStart.split('-')
+        var end = req.body.data.internTermEnd.split('-')
         var internTermEnd = new Date(end[0],end[1]-1, end[2], 32, 59,59)
-        var internTermEnd = new Date(start[0],start[1]-1, start[2], 9, 0,0)
+        var internTermStart = new Date(start[0],start[1]-1, start[2], 9, 0,0)
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
