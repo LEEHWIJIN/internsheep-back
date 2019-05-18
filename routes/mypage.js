@@ -255,18 +255,24 @@ router.post('/applyCo', function (req, res) {
         })
 
     function first() {
-        var sql1 =  'SELECT sID FROM student WHERE sLoginID = ?'
+        var sql1 =  'SELECT sID FROM student natural join resume WHERE sLoginID = ?'
         var params1 =  [req.body.sLoginID]
         console.log(req.body.sLoginID)
         return new Promise(function (resolve,reject) {
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else {
-                    console.log(rows)
-                    var data = []
-                    data[0]=rows[0].sID
-                    console.log(data)
-                    resolve(data)
+                    if(rows[0]== null) {
+                        console.log(rows[0])
+                        resolve('0')
+                    }
+                    else {
+                        console.log(rows)
+                        var data = []
+                        data[0] = rows[0].sID
+                        console.log('asdfasd')
+                        resolve(data)
+                    }
                 }
             })
         })
@@ -276,14 +282,21 @@ router.post('/applyCo', function (req, res) {
         var sql2 = 'SELECT applyNoticeID FROM applyNotice NATURAL JOIN companyNotice NATURAL JOIN company WHERE cName = ?'
         var params2 = [req.body.cName]
         return new Promise(function (resolve,reject) {
-            conn.init().query(sql2,params2, function (err, rows) {
-                if(err) console.log(err)
-                else{
-                    data[1] = rows[0].applyNoticeID
-                    console.log(data)
-                    resolve(data)
-                }
-            })
+            if(data == '0'){
+                console.log('뀨ㅠㅠ유유유')
+                resolve('0')
+            }
+            else {
+                conn.init().query(sql2, params2, function (err, rows) {
+                    if (err) console.log(err)
+                    else {
+                        data[1] = rows[0].applyNoticeID
+                        console.log(data)
+                        resolve(data)
+
+                    }
+                })
+            }
         })
     }
 
@@ -293,14 +306,19 @@ router.post('/applyCo', function (req, res) {
         var sID = data[0]
         var applyNoticeID =  data[1]
         var params3 = [applyNoticeID, 0, sID]
-
-        conn.init().query(sql3, params3, function (err, rows) {
-            if (err) console.log(err)
-            else {
-                res.send(rows)
-                resolve(rows)
+            if(data == '0'){
+                res.send('0')
+                resolve('0')
             }
-        })
+            else {
+                conn.init().query(sql3, params3, function (err, rows) {
+                    if (err) console.log(err)
+                    else {
+                        res.send(rows)
+                        resolve(rows)
+                    }
+                })
+            }
         })
     }
 })
