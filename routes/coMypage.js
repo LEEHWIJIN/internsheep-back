@@ -792,6 +792,7 @@ router.get('/watchApplyStdNum', function(req, res) {
 
 
 
+<<<<<<< HEAD
 
 router.post('/changeYNApplyStd', function(req, res)
 {
@@ -800,6 +801,25 @@ router.post('/changeYNApplyStd', function(req, res)
     var YN = req.body.data.YN
     var params = [YN, applyCoID]
     conn.init().query(sql, params, function(err, rows){
+=======
+router.post('/changeYNApplyStd', function(req, res)
+{
+    var sql = 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
+    var IDandYN = []
+    IDandYN[0] = req.body.data[0].stdApplyCoID
+    IDandYN[1] = req.body.data[0].YN
+    var index = 1;
+    while(IDandYN[index] != NULL)
+    {
+        sql += ' UNION '
+        sql += 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
+        IDandYN[2*index] = req.body.data[index].stdApplyCoID
+        IDandYN[2*index + 1] = req.body.data[index].YN
+        index++
+    }
+    console.log(sql)
+    conn.init().query(sql, IDandYN, function(err, rows){
+>>>>>>> coManageApplyStd
         if(err) console.log(err)
         else {
             if(YN == 1){
@@ -831,11 +851,12 @@ router.get('/showCompanyInfo', function(req, res)
         else 
         {
             console.log(rows)
-            res.send(rows)
+            res.send('1')
         }
     })
 })
 
+<<<<<<< HEAD
 router.post('/modifyCompanyInfo', function(req, res)
 {
     var loginID = req.body.cLoginID
@@ -859,3 +880,8 @@ router.post('/modifyCompanyInfo', function(req, res)
 
 
 module.exports = router
+=======
+
+
+module.exports = router
+>>>>>>> coManageApplyStd
