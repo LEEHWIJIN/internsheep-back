@@ -144,19 +144,31 @@ router.get('/watchApplyStd', function(req, res) {
 })
 
 
-
-router.post('/postApplyStd', function(req, res){
-    var sql = 'UPDATE studentApplyCompany SET YN = ? WHERE sName = ?'
-    var sName = req.body.sName
-    var YN = req.body.YN
-    var params = [YN, sName]
-    conn.init().query(sql, params, function(err, rows){
+router.post('/changeYNApplyStd', function(req, res)
+{
+    var sql = 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
+    var IDandYN = []
+    IDandYN[0] = req.body.data[0].stdApplyCoID
+    IDandYN[1] = req.body.data[0].YN
+    var index = 1;
+    while(IDandYN[index] != NULL)
+    {
+        sql += ' UNION '
+        sql += 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
+        IDandYN[2*index] = req.body.data[index].stdApplyCoID
+        IDandYN[2*index + 1] = req.body.data[index].YN
+        index++
+    }
+    console.log(sql)
+    conn.init().query(sql, IDandYN, function(err, rows){
         if(err) console.log(err)
         else {
             console.log(rows)
-            res.send(rows)
+            res.send('1')
         }
     })
 })
+
+
 
 module.exports = router
