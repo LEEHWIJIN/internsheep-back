@@ -794,36 +794,129 @@ router.get('/watchApplyStdNum', function(req, res) {
 
 router.post('/changeYNApplyStd', function(req, res)
 {
-    var sql = 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
-    var IDandYN = []
-    IDandYN[0] = req.body.data[0].stdApplyCoID
-    IDandYN[1] = req.body.data[0].YN
-    var index = 1;
-    while(IDandYN[index] != NULL)
-    {
-        sql += ' UNION '
-        sql += 'UPDATE stdApplyCo SET YN = ? WHERE stdApplyCoID = ?'
-        IDandYN[2*index] = req.body.data[index].stdApplyCoID
-        IDandYN[2*index + 1] = req.body.data[index].YN
-        index++
-    }
-    console.log(sql)
-    conn.init().query(sql, IDandYN, function(err, rows){
-        if(err) console.log(err)
-        else {
-            if(YN == 1){
-                var sql2 = 'INSERT INTO internDetail(stdApplyCoID) values(?)'
-                conn.init().query(sql2, applyCoID, function(err, rows){
-                    if(err) console.log(err)
-                    else{
-                        console.log(rows)
-                    }
-                })
-            }
-            console.log(rows)
-            res.send('1')
-        }
+    Promise.resolve()
+    .then(makeSql1)
+    .then(makeSql2)
+    .then(makeInternDetail1)
+    .then(makeInternDetail2)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
     })
+    function makeSql1()
+    {
+        var sql = 'UPDATE stdApplyCo SET YN = CASE stdApplyCoID '
+        var IDandYN = []
+        var index = 0;
+        while(req.body.data[index])
+        {
+            sql += 'WHEN ? THEN ? '
+            IDandYN[2*index] = req.body.data[index].stdApplyCoID
+            IDandYN[2*index + 1] = req.body.data[index].YN
+            index++
+            console.log(IDandYN)
+        }
+        return new Promise(function (resolve, reject) 
+        {
+            var param = []
+            IDandYN[2*index] = req.body.data[0].stdApplyCoID
+            param[0] = sql
+            param[1] = IDandYN
+            console.log(param)
+            resolve(param)
+        })
+    }
+    function makeSql2(param)
+    {
+        sql = param[0] + 'ELSE YN END WHERE stdApplyCoID IN (?'
+        IDandYN = param[1]
+        var index = 1
+        while(req.body.data[index])
+        {
+            sql += ', ?'
+            IDandYN[2*req.body.data.length + 1] = req.body.data[index].stdApplyCoID
+            index++
+
+        }
+        return new Promise(function (resolve, reject)
+        {
+            sql += ')'
+            console.log(sql)
+            conn.init().query(sql, IDandYN, function (err, rows) {
+                if (err) reject(err)
+                else 
+                {
+                    console.log(rows)
+                    resolve()
+                }
+            })
+
+        })
+    }
+    function makeInternDetail1()
+    {
+        var sql = 'SELECT * FROM stdApplyCo WHERE stdApplyCoID = ? AND YN = 1'
+        var stdApplyCoIDs = new Array()
+        stdApplyCoIDs[0] = req.body.data[0].stdApplyCoID
+        var index = 1
+        console.log(stdApplyCoIDs)
+        while(req.body.data[index])
+        {
+            sql += ' UNION '
+            sql += 'SELECT * FROM stdApplyCo WHERE stdApplyCoID = ? AND YN = 1'
+            stdApplyCoIDs[index] = req.body.data[index].stdApplyCoID
+            console.log(stdApplyCoIDs[index])
+            index++;
+        }
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, stdApplyCoIDs, function (err, rows) {
+                var stdApplyCoIDs2 = []
+                if (err) reject(err)
+                else
+                {
+                    if(rows.length == 0)
+                        res.send('합격한 학생이 없습니다.')
+                    else
+                    {
+                        console.log(rows[0].stdApplyCoID)
+                        var j=0;
+                        while(rows[j].stdApplyCoID)
+                        {
+                            stdApplyCoIDs2[j] =rows[j].stdApplyCoID
+                            j++
+                            console.log(stdApplyCoIDs2+8080)
+                            if(rows.length == j)
+                            {
+                                resolve(stdApplyCoIDs2)
+                                break 
+                            }
+                        }
+                    }
+                }
+            })
+        })
+    }
+
+    function makeInternDetail2 (stdApplyCoIDs)
+    {
+        var sql = 'INSERT INTO internDetail (stdApplyCoID) VALUES (?)'
+        var index = 1
+        while(stdApplyCoIDs[index])
+        {
+            sql += ', (?)'
+            index++
+        }
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, stdApplyCoIDs, function (err, rows) {
+                if (err) reject(err)
+                else
+                {
+                    res.send('1')
+                }
+            })
+        })
+    }
+
 })
 
 
