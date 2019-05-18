@@ -207,14 +207,16 @@ router.post('/writeNotice', function(req, res){
         })
 
     function getCompanyNotice() {
+        
         var sql = 'SELECT* FROM company WHERE cLoginID = ?'
         var cLoginID = req.body.cLoginID
+        //console.log(cLoginID)
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else
                 {
-                    console.log(rows.cID)
+                    console.log('1' + rows.cID)
                     resolve(rows[0].cID)
                 }
             })
@@ -230,7 +232,7 @@ router.post('/writeNotice', function(req, res){
                 if (err) reject(err)
                 else
                 {
-                    console.log(rows)
+                    console.log('2' + rows)
                     resolve(cID)
                 }
             })
@@ -238,10 +240,15 @@ router.post('/writeNotice', function(req, res){
     }
     function writeCompanyNotice(cID) 
     {
+
         var benefit = req.body.data.cBenefit
         var pay = req.body.data.cPay
-        var internTermStart = req.body.data.internTermStart
-        var internTermEnd = req.body.data.internTermEnd
+        var start = req.body.data.internTermStart.split('-')
+        var end = req.body.data.internTermEnd.split('-')
+        var internTermEnd = new Date(end[0],end[1]-1, end[2], 32, 59,59)
+        var internTermStart = new Date(start[0],start[1]-1, start[2], 9, 0,0)
+        // var internTermStart = req.body.data.internTermStart
+        // var internTermEnd = req.body.data.internTermEnd
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
@@ -254,7 +261,7 @@ router.post('/writeNotice', function(req, res){
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                        console.log(rows)
+                        console.log('3' + rows)
                         res.send('1')
                         resolve(0)
                 }
@@ -323,8 +330,10 @@ router.post('/modifyNotice', function(req, res)
     {
         var benefit = req.body.data.cBenefit
         var pay = req.body.data.cPay
-        var internTermStart = req.body.data.internTermStart
-        var internTermEnd = req.body.data.internTermEnd
+        var start = req.body.data.internTermStart.split('.')
+        var end = req.body.data.internTermEnd.split('.')
+        var internTermEnd = new Date(end[0],end[1]-1, end[2], 32, 59,59)
+        var internTermEnd = new Date(start[0],start[1]-1, start[2], 9, 0,0)
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
