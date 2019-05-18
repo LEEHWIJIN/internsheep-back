@@ -66,6 +66,7 @@ router.get('/recentApplyTerm', function(req, res){
                     count ++
                 }
             }
+            console.log(responseData)
             return res.json(responseData)
         }
     })

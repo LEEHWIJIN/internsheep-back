@@ -304,7 +304,7 @@ router.post('/applyCo', function (req, res) {
         var sql3 = 'INSERT INTO stdApplyCo (applyNoticeID, YN, sID) VALUES(?,?,?)'
         var sID = data[0]
         var applyNoticeID =  data[1]
-        var params3 = [applyNoticeID, 0, sID]
+        var params3 = [applyNoticeID, -1, sID]
             if(data == '0'){
                 res.send('0')
                 resolve('0')
@@ -343,51 +343,64 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT cName, YN, cImage, cOccupation FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student WHERE sLoginID = ?'
+    var sql = 'SELECT cName, YN, cImage, cOccupation, applyOrder FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student natural join applyTerm WHERE sLoginID = ? and applySemester =?'
     var sLoginID = req.query.sLoginID
-    console.log(req.query)
-    conn.init().query(sql, sLoginID, function (err, rows) {
+    var applySemester = req.query.applySemester
+    var params = [sLoginID, applySemester]
+    conn.init().query(sql, params, function (err, rows) {
         if (err) console.log(err)
         else {
             if (rows[0] == null) {
+                console.log('값이 없음')
                 return res.send('0')
             } else {
+                console.log('값이 있음')
                 return res.json(rows)
             }
         }
     })
 })
 
-router.post('/postReportAndReview', upload.single('file'), function (req, res) {
+router.post('/postReview', function (req, res) {
+    var sql1 = 'SELECT internID FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE sLoginID = ?'
+    var sLoginID = req.body.sLoginID
+    console.log(req.body)
+    conn.init().query(sql1, sLoginID, function (err, rows) {
+        if (err) console.log(err)
+        else {
+            var sql2 = 'INSERT INTO companyReview (internID, starScore, reviewContent, reviewTitle) VALUES(?,?,?,?)'
+            var internID = rows[0].internID
+            var starScore = req.body.starScore
+            var reviewContent = req.body.reviewContent
+            var reviewTitle = req.body.reviewTitle
+            var params2 = [internID, starScore, reviewContent, reviewTitle]
+            conn.init().query(sql2, params2, function (err, rows) {
+                if(err) console.log(err)
+                else {
+                    console.log(rows)
+                    res.send(rows)
+                }
+            })
+        }
+    })
+})
+
+router.post('/postReport', upload.single('file'), function (req, res) {
     var sql1 = 'SELECT internID FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE sLoginID = ?'
     var sLoginID = req.body.sLoginID
     conn.init().query(sql1, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
-            //var sql2 = 'INSERT INTO companyReview (internID, starScore, reviewContent, reviewTitle) VALUES(?,?,?,?)'
-            var sql2 = 'INSERT INTO companyReview (internID, reviewContent) VALUES(?,?)'
-            var sql3 = 'INSERT INTO report (internID, reportURL, reportRealName) VALUES(?,?,?)'
+            var sql2 = 'INSERT INTO report (internID, reportURL, reportRealName) VALUES(?,?,?)'
             var internID = rows[0].internID
-            //var starScore = req.body.starScore
-            var reviewContent = req.body.reviewContent
-            // var reviewTitle = req.body.reviewTitle
-            //var params2 = [internID, starScore, reviewContent, reviewTitle]
-            var params2 = [internID, reviewContent]
-
             var reportURL = req.file.path
             var reportRealName = req.body.name
-            var params3 = [internID,reportURL,reportRealName]
-
+            var params2 = [internID, reportURL, reportRealName]
             conn.init().query(sql2, params2, function (err, rows) {
                 if (err) console.log(err)
                 else {
                     console.log(rows)
-                }
-            })
-            conn.init().query(sql3, params3, function (err, rows) {
-                if (err) console.log(err)
-                else {
-                    console.log(rows)
+                    res.send(rows)
                 }
             })
         }
@@ -429,7 +442,7 @@ router.get('/downloadReport', function (req,res) {
 })
 
 router.get('/watchReview', function (req,res) {
-    var sql = 'SELECT starScore, reviewContent, reviewTitle, reviewDate FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN companyReview WHERE sLoginID = ?'
+    var sql = 'SELECT starScore, reviewContent, reviewTitle, cName, cOccupation FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN companyReview NATURAL JOIN applyNotice NATURAL JOIN companyNotice NATURAL JOIN company WHERE sLoginID = ?'
     var sLoginID = req.query.sLoginID
     var params = [sLoginID]
     conn.init().query(sql, params, function (err, rows) {
@@ -504,19 +517,16 @@ router.post('/modifyReview', function (req, res) {
             conn.init().query(sql3, sLoginID, function (err, rows) {
                 if (err) console.log(err)
                 else {
-                    //var sql4 = 'UPDATE companyReview SET starScore=?, reviewContent=?, reviewTitle=? WHERE reviewID = ?'
-                    var sql4 = 'UPDATE companyReview SET reviewContent=? WHERE reviewID = ?'
-                    //var starScore = req.body.starScore
+                    var sql4 = 'UPDATE companyReview SET starScore=?, reviewContent=?, reviewTitle=? WHERE reviewID = ?'
+                    var starScore = req.body.starScore
                     var reviewContent = req.body.reviewContent
-                    //var reviewTitle = req.body.reviewTitle
+                    var reviewTitle = req.body.reviewTitle
                     var reviewID = rows[0].reviewID
-                    // var params4 = [starScore, reviewContent, reviewTitle, reviewID]
-                    var params4 = [reviewContent ,reviewID]
+                    var params4 = [starScore, reviewContent, reviewTitle, reviewID]
                     conn.init().query(sql4, params4, function (err, rows) {
                         if(err) console.log(err)
                         else {
                             console.log(rows)
-                            resolve()
                             res.send(rows)
                         }
                     })
@@ -556,5 +566,30 @@ router.post('/modifyStudentInfo', function(req, res)
     })
 })
 
+router.post('/giveup', function(req, res)
+{
+    var sql1 = 'SELECT stdApplyCo.stdApplyCoID FROM student natural join stdApplyCo natural join applyNotice natural join applyTerm natural join companyNotice natural join company where sLoginID = ? AND applySemester =? and applyOrder =?'
+    var loginID = req.body.sLoginID
+    var applySemester = req.body.applySemester
+    var applyOrder = req.body.applyOrder
+    var params1=[loginID, applySemester, applyOrder]
+
+    conn.init().query(sql1, params1, function (err, rows) {
+        if(err) console.log(err)
+        else{
+            var sql2 = 'UPDATE stdApplyCo SET YN = 2 WHERE stdApplyCoID = ?'
+            var stdApplyCoID = rows[0].stdApplyCoID
+            conn.init().query(sql2, stdApplyCoID, function(err, rows)
+            {
+                if(err)res.send(err)
+                else
+                {
+                    console.log(rows)
+                    res.send(rows)
+                }
+            })
+        }
+    })
+})
 module.exports = router
 
