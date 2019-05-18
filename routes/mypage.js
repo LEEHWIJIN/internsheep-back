@@ -10,7 +10,7 @@ var storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         console.log(req.body)
-        cb(null, req.body.sNum + '-'+file.originalname)
+        cb(null, req.body.sLoginID + '-'+file.originalname)
     }
 })
 
@@ -271,7 +271,6 @@ router.post('/applyCo', function (req, res) {
                         console.log(rows)
                         var data = []
                         data[0] = rows[0].sID
-                        console.log('asdfasd')
                         resolve(data)
                     }
                 }
@@ -344,13 +343,14 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT cName, YN, cImage FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student WHERE sLoginID = ?'
+    var sql = 'SELECT cName, YN, cImage, cOccupation FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student WHERE sLoginID = ?'
     var sLoginID = req.query.sLoginID
+    console.log(req.query)
     conn.init().query(sql, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
-            if (rows == null) {
-                return res.send(false)
+            if (rows[0] == null) {
+                return res.send('0')
             } else {
                 return res.json(rows)
             }
@@ -359,39 +359,51 @@ router.get('/applyStatus', function (req, res) {
 })
 
 router.post('/postReportAndReview', upload.single('file'), function (req, res) {
-    var sql1 = 'INSERT INTO companyReview (cName, starScore, sName) VALUES(?,?,?)'
-    var sql2 = 'INSERT INTO report (sName, sNum, reportURL, reportRealName) VALUES(?,?,?,?)'
-    var cName = req.body.cName
-    var sNum = req.body.sNum
-    var sName = req.body.sName
-    var starScore = req.body.starScore
-    var reportURL = req.file.path
-    var reportRealName = req.body.name
-    var params1 = [cName, starScore, sName]
-    var params2 = [sName, sNum, reportURL, reportRealName]
-    conn.init().query(sql2, params2, function (err, rows) {
+    var sql1 = 'SELECT internID FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE sLoginID = ?'
+    var sLoginID = req.body.sLoginID
+    conn.init().query(sql1, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
-            console.log(rows)
-        }
-    })
-    conn.init().query(sql1, params1, function (err, rows) {
-        if (err) console.log(err)
-        else {
-            console.log(rows)
+            //var sql2 = 'INSERT INTO companyReview (internID, starScore, reviewContent, reviewTitle) VALUES(?,?,?,?)'
+            var sql2 = 'INSERT INTO companyReview (internID, reviewContent) VALUES(?,?)'
+            var sql3 = 'INSERT INTO report (internID, reportURL, reportRealName) VALUES(?,?,?)'
+            var internID = rows[0].internID
+            //var starScore = req.body.starScore
+            var reviewContent = req.body.reviewContent
+            // var reviewTitle = req.body.reviewTitle
+            //var params2 = [internID, starScore, reviewContent, reviewTitle]
+            var params2 = [internID, reviewContent]
+
+            var reportURL = req.file.path
+            var reportRealName = req.body.name
+            var params3 = [internID,reportURL,reportRealName]
+
+            conn.init().query(sql2, params2, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                }
+            })
+            conn.init().query(sql3, params3, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                }
+            })
         }
     })
 })
 
 
 router.get('/loadFileName', function (req,res) {
-    var sql = 'SELECT reportRealName FROM report WHERE sName = ?'
-    var sName = req.query.sName
-    conn.init().query(sql, sName, function (err, rows) {
+    var sql = 'SELECT reportRealName FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN report WHERE sLoginID= ?'
+    var sLoginID = req.query.sLoginID
+    var params = [sLoginID]
+    conn.init().query(sql, params, function (err, rows) {
         if(err) console.log(err)
         else{
             if(rows[0]==null){
-                res.send('')
+                res.send('0')
             }
             else {
                 res.send(rows[0].reportRealName)
@@ -401,13 +413,13 @@ router.get('/loadFileName', function (req,res) {
 })
 
 router.get('/downloadReport', function (req,res) {
-    var sql = 'SELECT reportURL FROM report WHERE sName = ?'
-    var sName = req.query.sName
-    conn.init().query(sql, sName, function (err, rows) {
+    var sql = 'SELECT reportURL FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN report WHERE sLoginID= ?'
+    var sLoginID = req.query.sLoginID
+    conn.init().query(sql, sLoginID, function (err, rows) {
         if(err) console.log(err)
         else{
             if(rows[0]==null){
-                res.send('')
+                res.send('0')
             }
             else {
                 res.download(rows[0].reportURL)
@@ -416,8 +428,25 @@ router.get('/downloadReport', function (req,res) {
     })
 })
 
+router.get('/watchReview', function (req,res) {
+    var sql = 'SELECT starScore, reviewContent, reviewTitle, reviewDate FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN companyReview WHERE sLoginID = ?'
+    var sLoginID = req.query.sLoginID
+    var params = [sLoginID]
+    conn.init().query(sql, params, function (err, rows) {
+        if(err) console.log(err)
+        else{
+            if(rows[0]==null){
+                res.send('0')
+            }
+            else {
+                console.log(rows[0])
+                res.send(rows[0])
+            }
+        }
+    })
+})
 
-router.post('/modifyReportAndReview', upload.single('file'), function (req, res) {
+router.post('/modifyReport', upload.single('file'), function (req, res) {
     Promise.resolve()
         .then(first)
         .then(second)
@@ -425,49 +454,74 @@ router.post('/modifyReportAndReview', upload.single('file'), function (req, res)
             console.log('Error', err)
             process.exit()
         })
-    var sName = req.body.sName
+
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql0 = 'SELECT reportURL FROM report WHERE sName=?'
-            conn.init().query(sql0,sName,function (err,rows) {
+            var sql1 = 'SELECT reportID, reportURL FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN report WHERE sLoginID = ?'
+            var sLoginID = req.body.sLoginID
+            conn.init().query(sql1,sLoginID,function (err,rows) {
                 if(err) console.log(err)
                 else{
                     fs.unlink(rows[0].reportURL, function (err) {
-                        if(err) resolve()
+                        if(err) {
+                            console.log(err)
+                            resolve(rows[0].reportID)
+                        }
                         else {
-                            resolve()
+                            console.log(rows[0].reportID)
+                            resolve(rows[0].reportID)
                         }
                     })
                 }
             })
         })
     }
-    function second() {
-        return new Promise(function (resolve, reject) {
-            var sql1 = 'UPDATE companyReview SET starScore= ? WHERE sName= ?'
-            var sql2 = 'UPDATE report SET reportRealName = ?, reportURL = ? WHERE sName=?'
-            var sNum = req.body.sNum
-            var starScore = req.body.starScore
-            var reportURL = req.file.path
-            var reportRealName = req.body.name
-            var params1 = [starScore,sName]
-            var params2 = [reportRealName, reportURL, sName]
-            console.log(params2)
-            conn.init().query(sql2, params2, function (err, rows) {
-                if (err) console.log(err)
-                else {
-                    console.log(rows)
-                }
-            })
-            conn.init().query(sql1, params1, function (err, rows) {
-                if (err) console.log(err)
-                else {
-                    console.log(rows)
-                }
-            })
-            resolve()
+
+    function second(data) {
+        return new Promise(function (resolve,reject) {
+            console.log(data)
+
+                    var sql2 = 'UPDATE report SET reportURL=?, reportRealName=? WHERE reportID = ?'
+                    var reportURL = req.file.path
+                    var reportRealName = req.body.name
+                    var reportID = data
+                    var params2 = [reportURL, reportRealName, reportID]
+                    conn.init().query(sql2, params2, function (err, rows) {
+                        if (err) console.log(err)
+                        else {
+                            console.log(rows)
+                            resolve()
+                        }
+                    })
         })
     }
+})
+
+router.post('/modifyReview', function (req, res) {
+            var sql3 = 'SELECT reviewID FROM student NATURAL JOIN stdApplyCo NATURAL JOIN internDetail NATURAL JOIN companyReview WHERE sLoginID = ?'
+            var sLoginID = req.body.sLoginID
+
+            conn.init().query(sql3, sLoginID, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    //var sql4 = 'UPDATE companyReview SET starScore=?, reviewContent=?, reviewTitle=? WHERE reviewID = ?'
+                    var sql4 = 'UPDATE companyReview SET reviewContent=? WHERE reviewID = ?'
+                    //var starScore = req.body.starScore
+                    var reviewContent = req.body.reviewContent
+                    //var reviewTitle = req.body.reviewTitle
+                    var reviewID = rows[0].reviewID
+                    // var params4 = [starScore, reviewContent, reviewTitle, reviewID]
+                    var params4 = [reviewContent ,reviewID]
+                    conn.init().query(sql4, params4, function (err, rows) {
+                        if(err) console.log(err)
+                        else {
+                            console.log(rows)
+                            resolve()
+                            res.send(rows)
+                        }
+                    })
+                }
+            })
 })
 
 router.get('/showStudentInfo', function(req, res)
