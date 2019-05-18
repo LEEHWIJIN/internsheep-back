@@ -100,7 +100,7 @@ router.post('/applyNotice', function(req, res) {
                     if (err) reject(err)
                     else {
                         console.log(rows)
-                        res.send(1)
+                        res.send('1')
                     }
                 })
             }
@@ -337,7 +337,7 @@ router.post('/modifyNotice', function(req, res)
                 if (err) reject(err)
                 else {
                         console.log(rows)
-                        res.send(1)
+                        res.send('1')
                         resolve(0)
                 }
             })
@@ -803,7 +803,7 @@ router.post('/changeYNApplyStd', function(req, res)
         if(err) console.log(err)
         else {
             console.log(rows)
-            res.send(1)
+            res.send('1')
         }
     })
 })
