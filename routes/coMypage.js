@@ -802,6 +802,15 @@ router.post('/changeYNApplyStd', function(req, res)
     conn.init().query(sql, params, function(err, rows){
         if(err) console.log(err)
         else {
+            if(YN == 1){
+                var sql2 = 'INSERT INTO internDetail(stdApplyCoID) values(?)'
+                conn.init().query(sql2, applyCoID, function(err, rows){
+                    if(err) console.log(err)
+                    else{
+                        console.log(rows)
+                    }
+                })
+            }
             console.log(rows)
             res.send('1')
         }
