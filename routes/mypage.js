@@ -258,17 +258,14 @@ router.post('/applyCo', function (req, res) {
     function first() {
         var sql1 =  'SELECT sID FROM student natural join resume WHERE sLoginID = ?'
         var params1 =  [req.body.sLoginID]
-        console.log(req.body.sLoginID)
         return new Promise(function (resolve,reject) {
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else {
                     if(rows[0]== null) {
-                        console.log(rows[0])
                         resolve('0')
                     }
                     else {
-                        console.log(rows)
                         var data = []
                         data[0] = rows[0].sID
                         resolve(data)
@@ -290,7 +287,7 @@ router.post('/applyCo', function (req, res) {
                     if (err) console.log(err)
                     else {
                         data[1] = rows[0].applyNoticeID
-                        console.log(data)
+                        data[2] = rows[0].applyStdNum
                         resolve(data)
 
                     }
@@ -302,6 +299,7 @@ router.post('/applyCo', function (req, res) {
     function four(data) {
         return new Promise(function (resolve,reject) {
         var sql3 = 'INSERT INTO stdApplyCo (applyNoticeID, YN, sID) VALUES(?,?,?)'
+            console.log(data)
         var sID = data[0]
         var applyNoticeID =  data[1]
         var params3 = [applyNoticeID, -1, sID]
@@ -334,7 +332,7 @@ router.post('/applyCo', function (req, res) {
             conn.init().query(sql4, params4, function (err, rows) {
                 if (err) console.log(err)
                 else {
-                    resolve(rows)
+                    resolve(data)
                 }
             })
           }
@@ -350,12 +348,13 @@ router.get('/applyStatus', function (req, res) {
     conn.init().query(sql, params, function (err, rows) {
         if (err) console.log(err)
         else {
+            console.log(rows)
             if (rows[0] == null) {
                 console.log('값이 없음')
                 return res.send('0')
             } else {
                 console.log('값이 있음')
-                return res.json(rows)
+                return res.json(rows[0])
             }
         }
     })
@@ -391,11 +390,12 @@ router.post('/postReport', upload.single('file'), function (req, res) {
     conn.init().query(sql1, sLoginID, function (err, rows) {
         if (err) console.log(err)
         else {
-            var sql2 = 'INSERT INTO report (internID, reportURL, reportRealName) VALUES(?,?,?)'
+            var sql2 = 'INSERT INTO report (internID, reportWritingDate, reportURL, reportRealName) VALUES(?,?,?,?)'
             var internID = rows[0].internID
+            var reportWritingDate = req.body.applySemester
             var reportURL = req.file.path
             var reportRealName = req.body.name
-            var params2 = [internID, reportURL, reportRealName]
+            var params2 = [internID, reportWritingDate, reportURL, reportRealName]
             conn.init().query(sql2, params2, function (err, rows) {
                 if (err) console.log(err)
                 else {
@@ -477,11 +477,11 @@ router.post('/modifyReport', upload.single('file'), function (req, res) {
                 else{
                     fs.unlink(rows[0].reportURL, function (err) {
                         if(err) {
-                            console.log(err)
+                            console.log('제대로 암됨')
                             resolve(rows[0].reportID)
                         }
                         else {
-                            console.log(rows[0].reportID)
+                            console.log('제대로 됨')
                             resolve(rows[0].reportID)
                         }
                     })
@@ -503,6 +503,7 @@ router.post('/modifyReport', upload.single('file'), function (req, res) {
                         if (err) console.log(err)
                         else {
                             console.log(rows)
+                            res.send(rows)
                             resolve()
                         }
                     })
