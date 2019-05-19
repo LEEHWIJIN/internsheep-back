@@ -46,6 +46,7 @@ router.post('/applyNotice', function(req, res) {
                     console.log(rows)
                     if (rows.length==0)
                     {
+                        console.log('신청할 수 없음')
                         res.send('신청할 수 없음')
                     }
                     else
@@ -72,6 +73,7 @@ router.post('/applyNotice', function(req, res) {
                     if (rows.length==0)
                     {
                         res.send('공고가 없음')
+                        console.log('공고가 없음')
                         var params = [0,0]
                         resolve(params)
                     }
@@ -128,7 +130,6 @@ router.get('/checkApplyNotice', function(req, res)
             conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
                 else {
-                    console.log(rows)
                     if (rows.length==0)
                     {
                         res.send('신청할 수 없음')
@@ -154,6 +155,7 @@ router.get('/checkApplyNotice', function(req, res)
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else {
+                    console.log('2'+ rows)
                     if (rows.length==0)
                     {
                         res.send('공고가 없음')
@@ -162,7 +164,7 @@ router.get('/checkApplyNotice', function(req, res)
                     }
                     else
                     {
-                        console.log(rows)
+                        console.log('공고있음')
                         var params =[rows[0].cNoticeID, applyTermID]
                         console.log(params)
                         resolve(params)
@@ -184,7 +186,7 @@ router.get('/checkApplyNotice', function(req, res)
                 {
                     if (err) reject(err)
                     else {
-                        console.log(rows)
+                        console.log('asasdfsf : '+ rows)
                         if(rows.length == 0)
                             res.send('0')
                         else    
@@ -216,7 +218,6 @@ router.post('/writeNotice', function(req, res){
                 if (err) reject(err)
                 else
                 {
-                    console.log('1' + rows.cID)
                     resolve(rows[0].cID)
                 }
             })
@@ -232,7 +233,6 @@ router.post('/writeNotice', function(req, res){
                 if (err) reject(err)
                 else
                 {
-                    console.log('2' + rows)
                     resolve(cID)
                 }
             })
@@ -240,28 +240,28 @@ router.post('/writeNotice', function(req, res){
     }
     function writeCompanyNotice(cID) 
     {
-
         var benefit = req.body.data.cBenefit
         var pay = req.body.data.cPay
         var start = req.body.data.internTermStart.split('-')
+        var start2 = start[2].split('T')[0]
         var end = req.body.data.internTermEnd.split('-')
-        var internTermEnd = new Date(end[0],end[1]-1, end[2], 32, 59,59)
-        var internTermStart = new Date(start[0],start[1]-1, start[2], 9, 0,0)
+        var end2 =  end[2].split('T')[0]
+        var internTermEnd = new Date(end[0],end[1]-1, end2, 23, 59,59)
+        var internTermStart = new Date(start[0],start[1]-1, start2, 0, 0,0)
         // var internTermStart = req.body.data.internTermStart
         // var internTermEnd = req.body.data.internTermEnd
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
         var info = req.body.data.cInfo
-
         var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag, cInfo) VALUES(?,?,?,?,?,?,?,?,?)'
         var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, info]
-
+        console.log(req.body.data.internTermStart.split('-'))
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                        console.log('3' + rows)
+                        console.log(rows[0])
                         res.send('1')
                         resolve(0)
                 }
