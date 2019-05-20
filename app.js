@@ -36,4 +36,4 @@ app.use('/admin', admin)
 app.use('/co/mypage', coMypage)
 
 
-module.exports = app
+module.exports = app;
