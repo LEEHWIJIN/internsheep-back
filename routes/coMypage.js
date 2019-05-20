@@ -967,6 +967,180 @@ router.post('/modifyCompanyInfo', function(req, res)
         }
     })
 })
+router.post('/endRecruitment', function(req, res)
+{
+    Promise.resolve()
+    .then(getApplyTermID)
+    .then(getcNoticeID)
+    .then(endRecruitment)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
+    })
+
+    function getApplyTermID() {
+        var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
+        var semester = req.query.applySemester
+        var order = req.query.applyOrder
+        var sqlParams = [semester,order]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    if (rows.length==0)
+                    {
+                        res.send('모집 상태를 바꿀 수 없음')
+                    }
+                    else
+                    {
+                        resolve(rows[0].applyTermID)
+                    }
+                }
+            })
+        })
+    }
+    function getcNoticeID(applyTermID)
+    {
+        if (!applyTermID)
+        {
+            var params = [0,0]
+            resolve(params)
+        }
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.query.cLoginID
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log('2'+ rows)
+                    if (rows.length==0)
+                    {
+                        res.send('공고가 없음')
+                        var params = [0,0]
+                        resolve(params)
+                    }   
+                    else
+                    {
+                        console.log('공고있음')
+                        var params =[rows[0].cNoticeID, applyTermID]
+                        console.log(params)
+                        resolve(params)
+                    }
+                }   
+            })
+        })
+    }
+
+    function endRecruitment(params) {
+        console.log(params)
+        var sql = 'UPDATE applyNotice SET cStatus = 1 WHERE cNoticeID = ? AND applyTermID = ?'
+        return new Promise(function (resolve, reject) {
+            if (params[0]==0 && params[1]==0)
+                resolve(0)
+            else
+            {
+                conn.init().query(sql, params, function (err, rows)
+                {
+                    if (err) reject(err)
+                    else {
+                        console.log('asasdfsf : '+ rows)
+                        if(rows.length == 0)
+                            res.send('0')
+                        else    
+                            res.send('1')
+                    }
+                })
+            }
+        })
+    }
+})
+router.post('/endSelection', function(req, res)
+{
+    Promise.resolve()
+    .then(getApplyTermID)
+    .then(getcNoticeID)
+    .then(endSelection)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
+    })
+
+    function getApplyTermID() {
+        var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
+        var semester = req.query.applySemester
+        var order = req.query.applyOrder
+        var sqlParams = [semester,order]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    if (rows.length==0)
+                    {
+                        res.send('모집 상태를 바꿀 수 없음')
+                    }
+                    else
+                    {
+                        resolve(rows[0].applyTermID)
+                    }
+                }
+            })
+        })
+    }
+    function getcNoticeID(applyTermID)
+    {
+        if (!applyTermID)
+        {
+            var params = [0,0]
+            resolve(params)
+        }
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.query.cLoginID
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log('2'+ rows)
+                    if (rows.length==0)
+                    {
+                        res.send('공고가 없음')
+                        var params = [0,0]
+                        resolve(params)
+                    }   
+                    else
+                    {
+                        console.log('공고있음')
+                        var params =[rows[0].cNoticeID, applyTermID]
+                        console.log(params)
+                        resolve(params)
+                    }
+                }   
+            })
+        })
+    }
+
+    function endSelection(params) {
+        console.log(params)
+        var sql = 'UPDATE applyNotice SET cStatus = 2 WHERE cNoticeID = ? AND applyTermID = ?'
+        return new Promise(function (resolve, reject) {
+            if (params[0]==0 && params[1]==0)
+                resolve(0)
+            else
+            {
+                conn.init().query(sql, params, function (err, rows)
+                {
+                    if (err) reject(err)
+                    else {
+                        console.log('asasdfsf : '+ rows)
+                        if(rows.length == 0)
+                            res.send('0')
+                        else    
+                            res.send('1')
+                    }
+                })
+            }
+        })
+    }
+})
 
 
 module.exports = router
