@@ -598,6 +598,11 @@ router.get('/watchApplyStd', function(req, res) {
                     else {
                         if(rows.length == 0)
                             res.send('공고 신청을 하지 않음')
+                        else if(rows[0].cStatus == 2)
+                        {
+                            console.log('선발 이미 완료')
+                            res.send('이미 선발을 완료 하였습니다.')
+                        }
                         else
                         {
                             console.log(rows)
@@ -807,6 +812,7 @@ router.post('/changeYNApplyStd', function(req, res)
     .then(makeSql1)
     .then(makeSql2)
     .then(makeInternDetail1)
+    .then(endRecruitment)
     .then(makeInternDetail2)
     .catch(function (err) {
         console.log('Error', err)
@@ -883,8 +889,12 @@ router.post('/changeYNApplyStd', function(req, res)
                 if (err) reject(err)
                 else
                 {
+                    var params = [stdApplyCoIDs, 0]
+
                     if(rows.length == 0)
-                        res.send('합격한 학생이 없습니다.')
+                    {
+                        resolve(params)
+                    }
                     else
                     {
                         console.log(rows[0].stdApplyCoID)
@@ -896,7 +906,9 @@ router.post('/changeYNApplyStd', function(req, res)
                             console.log(stdApplyCoIDs2+8080)
                             if(rows.length == j)
                             {
-                                resolve(stdApplyCoIDs2)
+                                params[0] = stdApplyCoIDs2
+                                params[1] = 1
+                                resolve(params)
                                 break 
                             }
                         }
@@ -905,7 +917,42 @@ router.post('/changeYNApplyStd', function(req, res)
             })
         })
     }
-
+    function endRecruitment(params)
+    {
+        var sql1 = 'SELECT * FROM stdApplyCo WHERE stdApplyCoID = ?'
+        var sql = 'UPDATE applyNotice SET cStatus = 2 WHERE applyNoticeID = ?'
+        console.log(params[0][0])
+        return new Promise(function (resolve, reject) {
+            if (params[1]==0)
+            {}
+            else
+            {
+                conn.init().query(sql1, params[0][0], function(err,rows)
+                {
+                    if(err) reject(err)
+                    else 
+                    {
+                        conn.init().query(sql, rows[0].applyNoticeID, function (err, rows)
+                        {
+                            if (err) reject(err)
+                            else 
+                            {
+                                console.log(rows)
+                                console.log('endRecruitment')
+                                if(params[1] = 0)
+                                {
+                                    res.send('합격한 학생이 없습니다.')
+                                    console.log('합격 음슴')
+                                }
+                                else
+                                    resolve (params[0])
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    }
     function makeInternDetail2 (stdApplyCoIDs)
     {
         var sql = 'INSERT INTO internDetail (stdApplyCoID) VALUES (?)'
@@ -920,14 +967,13 @@ router.post('/changeYNApplyStd', function(req, res)
                 if (err) reject(err)
                 else
                 {
+                    resolve(stdApplyCoIDs)
                     res.send('1')
                 }
             })
         })
     }
-
 })
-
 
 
 
@@ -966,6 +1012,93 @@ router.post('/modifyCompanyInfo', function(req, res)
             res.send('1')
         }
     })
+})
+router.post('/endSelection', function(req, res)
+{
+    Promise.resolve()
+    .then(getApplyTermID)
+    .then(getcNoticeID)
+    .then(endSelection)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
+    })
+
+    function getApplyTermID() {
+        var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
+        var semester = req.body.applySemester
+        var order = req.body.applyOrder
+        var sqlParams = [semester,order]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    if (rows.length==0)
+                    {
+                        res.send('모집 상태를 바꿀 수 없음')
+                    }
+                    else
+                    {
+                        resolve(rows[0].applyTermID)
+                    }
+                }
+            })
+        })
+    }
+    function getcNoticeID(applyTermID)
+    {
+        if (!applyTermID)
+        {
+            var params = [0,0]
+            resolve(params)
+        }
+        var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
+        var cLoginID = req.query.cLoginID
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, cLoginID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log('2'+ rows)
+                    if (rows.length==0)
+                    {
+                        res.send('공고가 없음')
+                        var params = [0,0]
+                        resolve(params)
+                    }   
+                    else
+                    {
+                        console.log('공고있음')
+                        var params =[rows[0].cNoticeID, applyTermID]
+                        console.log(params)
+                        resolve(params)
+                    }
+                }   
+            })
+        })
+    }
+
+    function endSelection(params) {
+        console.log(params)
+        var sql = 'UPDATE applyNotice SET cStatus = 2 WHERE cNoticeID = ? AND applyTermID = ?'
+        return new Promise(function (resolve, reject) {
+            if (params[0]==0 && params[1]==0)
+                resolve(0)
+            else
+            {
+                conn.init().query(sql, params, function (err, rows)
+                {
+                    if (err) reject(err)
+                    else {
+                        console.log('asasdfsf : '+ rows)
+                        if(rows.length == 0)
+                            res.send('0')
+                        else    
+                            res.send('1')
+                    }
+                })
+            }
+        })
+    }
 })
 
 
