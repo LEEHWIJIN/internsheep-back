@@ -536,20 +536,55 @@ router.get('/checkReportTerm', function (req,res) {
                             var n = Date.now()
                             // var count = 0
                             var today = new Date(n + 32400000)
-                            
                             var start = rows[0].internTermStart
-                            var end = rows[0].internTermEnd
-                            var diff1 = today - start
-                            var diff2 = end + 864000000 - today
+                            var endYear = rows[0].internTermEnd.getFullYear()
+                            var endDate = rows[0].internTermEnd.getDate()+10
+                            var endMonth = rows[0].internTermEnd.getMonth()
+                            
+
+                            if(endMonth==1||endMonth==3||endMonth==5||endMonth==7||endMonth==8||endMonth==10||endMonth==12){
+                                if(endDate > 31) {
+                                    endMonth++
+                                    endDate-=31
+                                    console.log(endDate)
+                                }
+                            }
+                            else if(endMonth==2){
+                                if(endMonth%4==0){
+                                    if(endDate>29) {
+                                        endMonth++
+                                        endDate-=29
+                                }
+                            }
+                        
+                                else{
+                                    if(endDate>28){
+                                        endMonth++
+                                        endDate-=28
+                                    }
+                                }
+                            }
+                            
+                            else{
+                                if(endDate>30){
+                                    endMonth++
+                                    endDate-=30
+                                }
+                            }
+                            var end = new Date(endYear,endMonth,endDate,32,59,59)
+                            console.log(end)
+                             var diff1 = today - start
+                            var diff2 = end - today
                             var currDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
-                            if (parseInt(diff1 / currDay) <= 0 && parseInt(diff2 / currDay) >= 0) {
-                                console.log(parseInt(diff1 / currDay))
+
+                            
+                            if (parseInt(diff1 / currDay) >= 0 && parseInt(diff2 / currDay) >= 0) {
                                 responseData[0] = '1'//리포트 작성기간이 맞다.
                             }
-                            if(responseData[0]==null){
+                            else{
                                 responseData[0]='0'//리포트 작성기간이 아니다.
                             }
-                            console.log("보낼데이터 입니다.",responseData[0])
+                            // console.log("보낼데이터 입니다.",responseData[0])
                             return res.send(responseData[0])
                             // resolve(rows[0])                       
                         }
