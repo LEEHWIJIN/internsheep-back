@@ -980,8 +980,8 @@ router.post('/endRecruitment', function(req, res)
 
     function getApplyTermID() {
         var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
-        var semester = req.query.applySemester
-        var order = req.query.applyOrder
+        var semester = req.body.applySemester
+        var order = req.body.applyOrder
         var sqlParams = [semester,order]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
@@ -1007,7 +1007,7 @@ router.post('/endRecruitment', function(req, res)
             resolve(params)
         }
         var sql = "SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?"
-        var cLoginID = req.query.cLoginID
+        var cLoginID = req.body.cLoginID
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
@@ -1043,7 +1043,7 @@ router.post('/endRecruitment', function(req, res)
                 {
                     if (err) reject(err)
                     else {
-                        console.log('asasdfsf : '+ rows)
+                        console.log(rows)
                         if(rows.length == 0)
                             res.send('0')
                         else    
@@ -1067,8 +1067,8 @@ router.post('/endSelection', function(req, res)
 
     function getApplyTermID() {
         var sql = 'SELECT * FROM applyTerm WHERE applySemester = ? AND applyOrder = ?'
-        var semester = req.query.applySemester
-        var order = req.query.applyOrder
+        var semester = req.body.applySemester
+        var order = req.body.applyOrder
         var sqlParams = [semester,order]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
