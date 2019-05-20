@@ -354,7 +354,7 @@ router.get('/applyStatus', function (req, res) {
                 return res.send('0')
             } else {
                 console.log('값이 있음')
-                return res.json(rows[0])
+                return res.json(rows)
             }
         }
     })
