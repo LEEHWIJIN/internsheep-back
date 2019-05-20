@@ -86,29 +86,29 @@ router.post('/resume', function (req, res) {
                 machineLang += `"Arduino" : `+ `"` +req.body.req.machineLang.Arduino+ `"` + `,`
                 machineLang += `"Firebase" : `+ `"` +req.body.req.machineLang.Firebase+ `"` +`}`
 
-            var sScore = `{`
-                sScore += `"computerprogramming" : `+ `"` +req.body.req.getUserGrade[0].computerprogramming[0]+ `"` + `,`
-                sScore += `"discretemath" : `+ `"` +req.body.req.getUserGrade[0].discretemath[0]+ `"` + `,`
-                sScore += `"datastructure" : `+ `"` +req.body.req.getUserGrade[0].datastructure[0]+ `"` + `,`
-                sScore += `"objectiveprogramming" : `+ `"` +req.body.req.getUserGrade[0].objectiveprogramming[0]+ `"` + `,`
-                sScore += `"computerstructure" : `+ `"` +req.body.req.getUserGrade[0].computerstructure[0]+ `"` + `,`
-                sScore += `"algorithm" : `+ `"` +req.body.req.getUserGrade[0].algorithm[0]+ `"` + `,`
-                sScore += `"systemprogramming" : `+ `"` +req.body.req.getUserGrade[0].systemprogramming[0]+ `"` + `,`
-                sScore += `"os" : `+ `"` +req.body.req.getUserGrade[0].os[0]+ `"` + `,`
-                sScore +=  `"database" : `+ `"` +req.body.req.getUserGrade[0].database[0]+ `"` + `,`
-                sScore += `"network" : `+ `"` +req.body.req.getUserGrade[0].network[0]+ `"` +`}`
+                var sScore = `{`
+                sScore += `"computerprogramming" : `+ `"` +req.body.req.getUserGrade[0].computerprogramming+ `"` + `,`
+                sScore += `"discretemath" : `+ `"` +req.body.req.getUserGrade[0].discretemath+ `"` + `,`
+                sScore += `"datastructure" : `+ `"` +req.body.req.getUserGrade[0].datastructure+ `"` + `,`
+                sScore += `"objectiveprogramming" : `+ `"` +req.body.req.getUserGrade[0].objectiveprogramming+ `"` + `,`
+                sScore += `"computerstructure" : `+ `"` +req.body.req.getUserGrade[0].computerstructure+ `"` + `,`
+                sScore += `"algorithm" : `+ `"` +req.body.req.getUserGrade[0].algorithm+ `"` + `,`
+                sScore += `"systemprogramming" : `+ `"` +req.body.req.getUserGrade[0].systemprogramming+ `"` + `,`
+                sScore += `"os" : `+ `"` +req.body.req.getUserGrade[0].os+ `"` + `,`
+                sScore +=  `"database" : `+ `"` +req.body.req.getUserGrade[0].database+ `"` + `,`
+                sScore += `"network" : `+ `"` +req.body.req.getUserGrade[0].network+ `"` +`}`
 
             var sEnglish = `{`
-            sEnglish += `"EnglishSearch" : ` +  `"` +req.body.req.getUserEng[0].EnglishSearch[0] + `"` + `,`
-            sEnglish += `"EnglishCommunication" : ` +  `"` +req.body.req.getUserEng[0].EnglishCommunication[0] + `"` + `,`
-            sEnglish += `"EnglishPresentation" : ` +  `"` +req.body.req.getUserEng[0].EnglishPresentation[0] + `"` + `,`
-            sEnglish += `"EnglishReport" : ` +  `"` +req.body.req.getUserEng[0].EnglishReport[0] + `"` +`}`
+            sEnglish += `"EnglishSearch" : ` +  `"` +req.body.req.getUserEng[0].EnglishSearch + `"` + `,`
+            sEnglish += `"EnglishCommunication" : ` +  `"` +req.body.req.getUserEng[0].EnglishCommunication + `"` + `,`
+            sEnglish += `"EnglishPresentation" : ` +  `"` +req.body.req.getUserEng[0].EnglishPresentation + `"` + `,`
+            sEnglish += `"EnglishReport" : ` +  `"` +req.body.req.getUserEng[0].EnglishReport + `"` +`}`
 
             var sPhone = req.body.req.getUserInfo[0].sPhone
-            var sHope = req.body.req.getUserInfo[0].sHope[0]
+            var sHope = req.body.req.getUserInfo[0].sHope
             var sEmail = req.body.req.getUserInfo[0].sEmail
-            var sGrade = req.body.req.getUserInfo[0].sGrade[0]
-            var sHopeTerm = req.body.req.getUserInfo[0].sHopeTerm[0]
+            var sGrade = req.body.req.getUserInfo[0].sGrade
+            var sHopeTerm = req.body.req.getUserInfo[0].sHopeTerm
             var sql2 = 'INSERT INTO resume (sID, programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
             var params2 = [sID, programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish]
             conn.init().query(sql2, params2, function (err, rows) {
@@ -205,7 +205,7 @@ router.post('/modifyResume', function (req, res) {
                 machineLang += `"Unity" : `+ `"` +req.body.req.machineLang.Unity+ `"` +`,`
                 machineLang += `"Arduino" : `+ `"` +req.body.req.machineLang.Arduino+ `"` + `,`
                 machineLang += `"Firebase" : `+ `"` +req.body.req.machineLang.Firebase+ `"` +`}`
-
+            console.log(req.body.req.getUserGrade)
             var sScore = `{`
                 sScore += `"computerprogramming" : `+ `"` +req.body.req.getUserGrade[0].computerprogramming+ `"` + `,`
                 sScore += `"discretemath" : `+ `"` +req.body.req.getUserGrade[0].discretemath+ `"` + `,`
