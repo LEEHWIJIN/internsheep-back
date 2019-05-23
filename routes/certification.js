@@ -19,9 +19,9 @@ router.get("/confirm", function(req,res)
 
     function confirm1()
     {
-        var sql = 'SELECT * FROM company WHERE cLoginID = ? AND certificationKey = ?'
+        var sql = 'SELECT * FROM student WHERE sLoginID = ? AND certificationKey = ?'
         var key = req.query.certificationKey
-        var ID = req.query.cLoginID
+        var ID = req.query.sLoginID
         var sqlParams = [ID, key]
         console.log(sqlParams)
         return new Promise(function (resolve, reject) {
@@ -36,8 +36,8 @@ router.get("/confirm", function(req,res)
     }
     function confirm2(cLoginID)
     {
-        var sql = 'UPDATE company SET certification = 1 WHERE cLoginID = ?'
-        var ID = req.query.cLoginID
+        var sql = 'UPDATE student SET certification = 1 WHERE sLoginID = ?'
+        var ID = req.query.sLoginID
 
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, ID, function (err, rows) {
