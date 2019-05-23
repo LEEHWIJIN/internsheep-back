@@ -1,11 +1,56 @@
 const Router = require('express')
 const router = Router()
 const mysql = require('../db/database_config.js')
-const mail = require('nodemailer') 
+const nodemail = require('../certification/eamil_config')
+const mailInfo = require('../certification/email').test
+var mailing = nodemail()
 var conn = mysql()
 
 
-router.post("/mailCertification", function(req,res)
+router.get("/confirm", function(req,res)
 {
-    var email
+    Promise.resolve()
+        .then(confirm1)
+        .then(confirm2)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function confirm1()
+    {
+        var sql = 'SELECT * FROM company WHERE cLoginID = ? AND certificationKey = ?'
+        var key = req.query.certificationKey
+        var ID = req.query.cLoginID
+        var sqlParams = [ID, key]
+        console.log(sqlParams)
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, sqlParams, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    resolve(rows[0].cLoginID)
+                }
+            })
+        })
+    }
+    function confirm2(cLoginID)
+    {
+        var sql = 'UPDATE company SET certification = 1 WHERE cLoginID = ?'
+        var ID = req.query.cLoginID
+
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, ID, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    res.send('인증완료')
+                }
+            })
+        })
+    }
+
+
 })
+
+module.exports = router
