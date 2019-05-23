@@ -442,93 +442,17 @@ router.get('/downloadReport', function (req,res) {
 })
 
 router.get('/checkReportTerm', function (req,res) {
-    Promise.resolve()
-        .then(getsID)
-        .then(getapplyNoticeID)
-        .then(getNoticID)
-        .then(getInternsheepTerm)
-        // .then(showResumeYN)
-        .catch(function (err) {
-            console.log('Error', err)
-            process.exit()
-        })
 
-        function getsID() {
-            console.log("sLoginID",req.query.sLoginID)
-            var sql = 'SELECT sID FROM student WHERE sLoginID = ?'
-            var sLoginID = req.query.sLoginID
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, sLoginID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        console.log(rows)
-                        if (rows.length==0)
-                        {
-                            res.send('ID가 없음')
-                        }
-                        else
-                        {
-                            resolve(rows[0].sID)                       
-                        }
-                    }
-                })
-            })
-        }
-
-        function getapplyNoticeID(sID) {
-            console.log("sID : ",sID)
-            var sql1 = 'SELECT applyNoticeID FROM stdApplyCo WHERE sID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql1, sID, function (err, rows) {
-                    if (err) reject(err)
+            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice natural join stdApplyCo natural join student natural join applyNotice natural join applyTerm WHERE sLoginID = ? and applySemester =? and YN = 1'
+    var sLoginID = req.query.sLoginID
+    var applySemester = req.query.applySemester
+    var params = [sLoginID, applySemester]
+                conn.init().query(sql, params, function (err, rows) {
+                    if (err) console.log(err)
                     else {
                         if (rows.length==0)
                         {
-                            res.send('sID가 있고 applyNoticeId가 없음')
-                        }
-                        else
-                        {
-                            console.log("applynoticId이다.",rows)
-                            resolve(rows[0].applyNoticeID)                       
-                        }
-                    }
-                })
-            })
-        }
-
-        function getNoticID(applyNoticeID) {
-            var sql = 'SELECT cNoticeID FROM applyNotice WHERE applyNoticeID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, applyNoticeID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        console.log(rows)
-                        if (rows.length==0)
-                        {
-                            res.send('회사 공고가 없음')
-                        }
-                        else
-                        {
-                            resolve(rows[0].cNoticeID)                       
-                        }
-                    }
-                })
-            })
-        }
-        
-        function getInternsheepTerm(cNoticeID) {
-            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice WHERE cNoticeID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, cNoticeID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        if (rows.length==0)
-                        {
-                            res.send('기간이 없음')
+                            res.send('실습한 기업 없음')
                         }
                         else
                         {
@@ -555,9 +479,7 @@ router.get('/checkReportTerm', function (req,res) {
                         }
                     }
                 })
-            })
-        }
-    
+
 })
 
 router.get('/watchReview', function (req,res) {

@@ -35,9 +35,7 @@ router.post('/std/signup',(req,res)=>{
                                 res.send({result : 1})
                             }
                         })
-
                     })
-                
                 }
             }
         })
