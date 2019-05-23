@@ -42,7 +42,34 @@ router.post('/std/signup',(req,res)=>{
             }
         })
     }
-    else res.json(result.error);//조건에 안맞을때
+    else
+    {
+        if(result.error.message == 'child "name" fails because ["name" length must be less than or equal to 30 characters long]')
+        {
+            console.log('이름은 30자 이하여야합니다.')
+            res.send('이름은 30자 이하여야합니다.')
+        }
+        else if(result.error.message == 'child "name" fails because ["name" length must be at least 2 characters long]')
+        {
+            console.log('이름은 한글자 이상이여야합니다.')
+            res.send('이름은 한글자 이상이여야합니다.')
+        }
+        else if(result.error.message == 'child "id" fails because ["id" length must be at least 4 characters long]')
+        {
+            console.log('아이디는 최소 4글자 이상이여야합니다.')
+            res.send('아이디는 최소 4글자 이상이여야합니다.')
+        }
+        else if(result.error.message == 'child "id" fails because ["id" length must be less than or equal to 30 characters long]')
+        {
+            console.log('아이디는 최대 30글자입니다.')
+            res.send('아이디는 최대 30글자입니다.')
+        }
+        else
+        {
+            console.log(result.error.message)
+            res.json(result.error);//조건에 안맞을때
+        }
+    }
 })
 
 router.post('/std/login',(req,res)=>{
@@ -129,7 +156,34 @@ router.post('/co/signup',(req,res)=>{
             }
         })
     }
-    else res.json(result.error);//조건에 안맞을때
+    else
+    {
+        if(result.error.message == 'child "name" fails because ["name" length must be less than or equal to 30 characters long]')
+        {
+            console.log('이름은 30자 이하여야합니다.')
+            res.send('이름은 30자 이하여야합니다.')
+        }
+        else if(result.error.message == 'child "name" fails because ["name" length must be at least 2 characters long]')
+        {
+            console.log('이름은 한글자 이상이여야합니다.')
+            res.send('이름은 한글자 이상이여야합니다.')
+        }
+        else if(result.error.message == 'child "id" fails because ["id" length must be at least 4 characters long]')
+        {
+            console.log('아이디는 최소 4글자 이상이여야합니다.')
+            res.send('아이디는 최소 4글자 이상이여야합니다.')
+        }
+        else if(result.error.message == 'child "id" fails because ["id" length must be less than or equal to 30 characters long]')
+        {
+            console.log('아이디는 최대 30글자입니다.')
+            res.send('아이디는 최대 30글자입니다.')
+        }
+        else
+        {
+            console.log(result.error.message)
+            res.json(result.error);//조건에 안맞을때
+        }
+    }
 })
 
 router.post('/co/login',(req,res)=>{
