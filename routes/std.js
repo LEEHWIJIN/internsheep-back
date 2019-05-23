@@ -31,4 +31,20 @@ router.get('/wantList', function(req, res){
     })
 })
 
+router.get('/loadCoReview', function(req, res){
+    var sql = 'SELECT cName, starScore, reviewTitle, reviewContent, internTermStart, internTermEnd FROM company NATURAL JOIN stdApplyCo NATURAL JOIN applyNotice NATURAL JOIN companyNotice NATURAL JOIN internDetail NATURAL JOIN companyReview WHERE cName = ?'
+    var params = [req.query.cName]
+    conn.init().query(sql,params,function(err, rows){
+        if(err) console.log(err)
+        else {
+            if(rows[0]==null){
+                res.send('0')
+            }
+            else {
+                return res.json(rows)
+            }
+        }
+    })
+})
+
 module.exports = router

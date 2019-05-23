@@ -174,6 +174,7 @@ router.post('/modifyResume', function (req, res) {
                 frameworkLang += `"Flask" :`+ `"` +req.body.req.frameworkLang.Flask+ `"` +`,`
                 frameworkLang += `"Cordova" : `+ `"` + req.body.req.frameworkLang.Cordova + `"` +`}`
 
+
             var databaseLang = `{`
                 databaseLang += `"MySql" : ` + `"` +req.body.req.databaseLang.MySql + `"` + `,`
                 databaseLang += `"SQLServer" : `+ `"` +req.body.req.databaseLang.SQLServer + `"` + `,`
@@ -442,93 +443,17 @@ router.get('/downloadReport', function (req,res) {
 })
 
 router.get('/checkReportTerm', function (req,res) {
-    Promise.resolve()
-        .then(getsID)
-        .then(getapplyNoticeID)
-        .then(getNoticID)
-        .then(getInternsheepTerm)
-        // .then(showResumeYN)
-        .catch(function (err) {
-            console.log('Error', err)
-            process.exit()
-        })
 
-        function getsID() {
-            console.log("sLoginID",req.query.sLoginID)
-            var sql = 'SELECT sID FROM student WHERE sLoginID = ?'
-            var sLoginID = req.query.sLoginID
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, sLoginID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        console.log(rows)
-                        if (rows.length==0)
-                        {
-                            res.send('ID가 없음')
-                        }
-                        else
-                        {
-                            resolve(rows[0].sID)                       
-                        }
-                    }
-                })
-            })
-        }
-
-        function getapplyNoticeID(sID) {
-            console.log("sID : ",sID)
-            var sql1 = 'SELECT applyNoticeID FROM stdApplyCo WHERE sID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql1, sID, function (err, rows) {
-                    if (err) reject(err)
+            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice natural join stdApplyCo natural join student natural join applyNotice natural join applyTerm WHERE sLoginID = ? and applySemester =? and YN = 1'
+    var sLoginID = req.query.sLoginID
+    var applySemester = req.query.applySemester
+    var params = [sLoginID, applySemester]
+                conn.init().query(sql, params, function (err, rows) {
+                    if (err) console.log(err)
                     else {
                         if (rows.length==0)
                         {
-                            res.send('sID가 있고 applyNoticeId가 없음')
-                        }
-                        else
-                        {
-                            console.log("applynoticId이다.",rows)
-                            resolve(rows[0].applyNoticeID)                       
-                        }
-                    }
-                })
-            })
-        }
-
-        function getNoticID(applyNoticeID) {
-            var sql = 'SELECT cNoticeID FROM applyNotice WHERE applyNoticeID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, applyNoticeID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        console.log(rows)
-                        if (rows.length==0)
-                        {
-                            res.send('회사 공고가 없음')
-                        }
-                        else
-                        {
-                            resolve(rows[0].cNoticeID)                       
-                        }
-                    }
-                })
-            })
-        }
-        
-        function getInternsheepTerm(cNoticeID) {
-            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice WHERE cNoticeID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, cNoticeID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        if (rows.length==0)
-                        {
-                            res.send('기간이 없음')
+                            res.send('실습한 기업 없음')
                         }
                         else
                         {
@@ -590,9 +515,7 @@ router.get('/checkReportTerm', function (req,res) {
                         }
                     }
                 })
-            })
-        }
-    
+
 })
 
 router.get('/watchReview', function (req,res) {
@@ -746,5 +669,135 @@ router.post('/giveup', function(req, res)
         }
     })
 })
+
+router.get('/checkPickCo',function(req,res){
+    Promise.resolve()
+        .then(findstdPickCoID)
+        .then(findPickCo)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+    function findstdPickCoID() {
+        var sql='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
+        var params = [req.query.sLoginID,req.query.cName]
+        conn.init().query(sql,params,function(err,rows){
+            if(err) console.log(err)
+            else{
+                console.log(rows)
+                resolve(rows[0])
+            }
+        })
+    }
+    function findPickCo(ID){
+        var sql='select stdPickCoID from stdPickCo where sID = ? and cID = ?'
+        var params = [ID.sID, ID.cID]
+        conn.init().query(sql,params,function(err,rows){
+            if(err) console.log(err)
+            else{
+                console.log(rows)
+                if(rows.length==0){//No std pick co
+                    res.send({result:0})
+                }
+                else{
+                    res.send({result:1})
+                }
+            }
+        })
+    }
+})
+
+router.post('/postStdPickCo', function (req, res) {
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+    function first() {
+        return new Promise(function (resolve,reject) {
+            var sql1 = 'select sID, cID, sLoginID, cName from student join company where student.sLoginID = ? and company.cName = ?'
+            var params1 = [req.body.sLoginID, req.body.cName]
+            conn.init().query(sql1, params1, function (err,rows) {
+                if(err) console.log(err)
+                else{
+                    console.log(rows)
+                    resolve(rows[0])
+                }
+            })
+        })
+    }
+    function second(data) {
+        return new Promise(function (resolve, reject) {
+            var sql2 = 'INSERT INTO stdPickCo (sID, cID) VALUES(?,?)'
+            var params2 = [data.sID, data.cID]
+            conn.init().query(sql2, params2, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                    resolve(rows)
+                }
+            })
+        })
+    }
+})
+
+router.get('/watchStdPickCo', function (req,res) {
+    var sql = 'SELECT cName, cImage, cOccupation, cTag, applyStdNum FROM student NATURAL JOIN stdPickCo NATURAL JOIN company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm WHERE sLoginID = ? and applySemester=? and applyOrder =?'
+    var sLoginID = req.query.sLoginID
+    var applySemester = req.query.applySemester
+    var applyOrder = req.query.applyOrder
+    var params = [sLoginID, applySemester, applyOrder]
+    conn.init().query(sql, params, function (err, rows) {
+        if(err) console.log(err)
+        else{
+            if(rows[0]==null){
+                res.send('')
+            }
+            else {
+               res.json(rows)
+            }
+        }
+    })
+})
+
+router.post('/deleteStdPickCo', function (req, res) {
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+    function first() {
+        return new Promise(function (resolve,reject) {
+            var sql1 = 'select stdPickCoID from student natural join stdPickCo natural join company where sLoginID = ? AND cName =?'
+            var params1 = [req.body.sLoginID, req.body.cName]
+            conn.init().query(sql1, params1, function (err,rows) {
+                if(err) console.log(err)
+                else{
+                    console.log(rows)
+                    resolve(rows[0].stdPickCoID)
+                }
+            })
+        })
+    }
+    function second(data) {
+        return new Promise(function (resolve, reject) {
+            console.log(data.sLoginID)
+            var sql2 = 'DELETE FROM stdPickCo WHERE stdPickCoID = ?'
+            var params2 = [data]
+            conn.init().query(sql2, params2, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                    resolve(rows)
+                }
+            })
+        })
+    }
+})
+
 module.exports = router
 
