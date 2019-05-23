@@ -714,40 +714,20 @@ router.post('/giveup', function(req, res)
 })
 
 router.get('/checkPickCo',function(req,res){
-    Promise.resolve()
-        .then(findstdPickCoID)
-        .then(findPickCo)
-        .catch(function (err) {
-            console.log('Error', err)
-            process.exit()
-        })
-    function findstdPickCoID() {
-        var sql='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
-        var params = [req.query.sLoginID,req.query.cName]
+    var sql='select * from student natural join company natural join companyNotice join applyNotice natural join stdPickCo natural join applyTerm where sLoginID = ? and cName = ? and applySemester =? and applyOrder=?'
+        var params = [req.query.sLoginID,req.query.cName, req.query.applySemester, req.query.applyOrder]
         conn.init().query(sql,params,function(err,rows){
             if(err) console.log(err)
             else{
-                console.log(rows)
-                resolve(rows[0])
-            }
-        })
-    }
-    function findPickCo(ID){
-        var sql='select stdPickCoID from stdPickCo where sID = ? and cID = ?'
-        var params = [ID.sID, ID.cID]
-        conn.init().query(sql,params,function(err,rows){
-            if(err) console.log(err)
-            else{
-                console.log(rows)
-                if(rows.length==0){//No std pick co
-                    res.send({result:0})
+                if(rows[0]==null){
+                    res.send('0')//찜한적 없음
                 }
                 else{
-                    res.send({result:1})
+                    res.send('1')//찜했음
                 }
+                
             }
         })
-    }
 })
 
 router.post('/postStdPickCo', function (req, res) {
