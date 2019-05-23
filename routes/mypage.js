@@ -335,7 +335,6 @@ router.get('/downloadReport', function (req,res) {
     })
 })
 
-
 router.post('/modifyReportAndReview', upload.single('file'), function (req, res) {
     Promise.resolve()
         .then(first)
@@ -385,6 +384,43 @@ router.post('/modifyReportAndReview', upload.single('file'), function (req, res)
                 }
             })
             resolve()
+        })
+    }
+})
+
+router.get('/checkPickCo',function(req,res){
+    Promise.resolve()
+        .then(findstdPickCoID)
+        .then(findPickCo)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+    function findstdPickCoID() {
+        var sql='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
+        var params = [req.query.sLoginID,req.query.cName]
+        conn.init().query(sql,params,function(err,rows){
+            if(err) console.log(err)
+            else{
+                console.log(rows)
+                resolve(rows[0])
+            }
+        })
+    }
+    function findPickCo(ID){
+        var sql='select stdPickCoID from stdPickCo where sID = ? and cID = ?'
+        var params = [ID.sID, ID.cID]
+        conn.init().query(sql,params,function(err,rows){
+            if(err) console.log(err)
+            else{
+                console.log(rows)
+                if(rows.length==0){//No std pick co
+                    res.send({result:0})
+                }
+                else{
+                    res.send({result:1})
+                }
+            }
         })
     }
 })
