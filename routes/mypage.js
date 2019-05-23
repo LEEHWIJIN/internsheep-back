@@ -399,7 +399,7 @@ router.post('/postStdPickCo', function (req, res) {
         })
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql1 = 'select sID, cID, sLoginID, cName from student join company where student.sLoginID = ? and company.cName = ?'
+            var sql1 = 'select sID, applyNoticeID, sLoginID, cName from student join company join companyNotice join applyNotice where student.sLoginID = ? and company.cName = ? and companyNotice.cID = company.cID and companyNotice.cNoticeID = applyNotice.cNoticeID'
             var params1 = [req.body.sLoginID, req.body.cName]
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
@@ -412,8 +412,8 @@ router.post('/postStdPickCo', function (req, res) {
     }
     function second(data) {
         return new Promise(function (resolve, reject) {
-            var sql2 = 'INSERT INTO stdPickCo (sID, cID) VALUES(?,?)'
-            var params2 = [data.sID, data.cID]
+            var sql2 = 'INSERT INTO stdPickCo (sID, applyNoticeID) VALUES(?,?)'
+            var params2 = [data.sID, data.applyNoticeID]
             conn.init().query(sql2, params2, function (err, rows) {
                 if (err) console.log(err)
                 else {
@@ -454,8 +454,8 @@ router.post('/deleteStdPickCo', function (req, res) {
         })
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql1 = 'select stdPickCoID from student natural join stdPickCo natural join company where sLoginID = ? AND cName =?'
-            var params1 = [req.body.sLoginID, req.body.cName]
+            var sql1 = 'select stdPickCoID from student natural join stdPickCo natural join company natural join companyNotice natural join applyNotice natural join applyTerm where sLoginID = ? AND cName =? AND applySemester =? and applyOrder =?'
+            var params1 = [req.body.sLoginID, req.body.cName, req.body.applySemester, req.body.applyOrder]
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else{
