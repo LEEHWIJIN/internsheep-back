@@ -18,6 +18,7 @@ router.post('/postApplyTerm', function(req, res){
     })
 })
 
+
 router.get('/listApplyTerm', function(req, res){
     var sql = 'SELECT applyStart, applyEnd, applySemester, applyOrder FROM applyTerm'
     conn.init().query(sql, function(err, rows){

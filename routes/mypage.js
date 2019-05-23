@@ -443,93 +443,17 @@ router.get('/downloadReport', function (req,res) {
 })
 
 router.get('/checkReportTerm', function (req,res) {
-    Promise.resolve()
-        .then(getsID)
-        .then(getapplyNoticeID)
-        .then(getNoticID)
-        .then(getInternsheepTerm)
-        // .then(showResumeYN)
-        .catch(function (err) {
-            console.log('Error', err)
-            process.exit()
-        })
 
-        function getsID() {
-            console.log("sLoginID",req.query.sLoginID)
-            var sql = 'SELECT sID FROM student WHERE sLoginID = ?'
-            var sLoginID = req.query.sLoginID
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, sLoginID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        console.log(rows)
-                        if (rows.length==0)
-                        {
-                            res.send('ID가 없음')
-                        }
-                        else
-                        {
-                            resolve(rows[0].sID)                       
-                        }
-                    }
-                })
-            })
-        }
-
-        function getapplyNoticeID(sID) {
-            console.log("sID : ",sID)
-            var sql1 = 'SELECT applyNoticeID FROM stdApplyCo WHERE sID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql1, sID, function (err, rows) {
-                    if (err) reject(err)
+            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice natural join stdApplyCo natural join student natural join applyNotice natural join applyTerm WHERE sLoginID = ? and applySemester =? and YN = 1'
+    var sLoginID = req.query.sLoginID
+    var applySemester = req.query.applySemester
+    var params = [sLoginID, applySemester]
+                conn.init().query(sql, params, function (err, rows) {
+                    if (err) console.log(err)
                     else {
                         if (rows.length==0)
                         {
-                            res.send('sID가 있고 applyNoticeId가 없음')
-                        }
-                        else
-                        {
-                            console.log("applynoticId이다.",rows)
-                            resolve(rows[0].applyNoticeID)                       
-                        }
-                    }
-                })
-            })
-        }
-
-        function getNoticID(applyNoticeID) {
-            var sql = 'SELECT cNoticeID FROM applyNotice WHERE applyNoticeID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, applyNoticeID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        console.log(rows)
-                        if (rows.length==0)
-                        {
-                            res.send('회사 공고가 없음')
-                        }
-                        else
-                        {
-                            resolve(rows[0].cNoticeID)                       
-                        }
-                    }
-                })
-            })
-        }
-        
-        function getInternsheepTerm(cNoticeID) {
-            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice WHERE cNoticeID = ?'
-            
-            return new Promise(function (resolve, reject) {
-                conn.init().query(sql, cNoticeID, function (err, rows) {
-                    if (err) reject(err)
-                    else {
-                        if (rows.length==0)
-                        {
-                            res.send('기간이 없음')
+                            res.send('실습한 기업 없음')
                         }
                         else
                         {
@@ -537,28 +461,61 @@ router.get('/checkReportTerm', function (req,res) {
                             var n = Date.now()
                             // var count = 0
                             var today = new Date(n + 32400000)
-                            
                             var start = rows[0].internTermStart
-                            var end = rows[0].internTermEnd
-                            var diff1 = today - start
-                            var diff2 = end + 864000000 - today
+                            var endYear = rows[0].internTermEnd.getFullYear()
+                            var endDate = rows[0].internTermEnd.getDate()+10
+                            var endMonth = rows[0].internTermEnd.getMonth()
+                            
+
+                            if(endMonth==1||endMonth==3||endMonth==5||endMonth==7||endMonth==8||endMonth==10||endMonth==12){
+                                if(endDate > 31) {
+                                    endMonth++
+                                    endDate-=31
+                                    console.log(endDate)
+                                }
+                            }
+                            else if(endMonth==2){
+                                if(endMonth%4==0){
+                                    if(endDate>29) {
+                                        endMonth++
+                                        endDate-=29
+                                }
+                            }
+                        
+                                else{
+                                    if(endDate>28){
+                                        endMonth++
+                                        endDate-=28
+                                    }
+                                }
+                            }
+                            
+                            else{
+                                if(endDate>30){
+                                    endMonth++
+                                    endDate-=30
+                                }
+                            }
+                            var end = new Date(endYear,endMonth,endDate,32,59,59)
+                            console.log(end)
+                             var diff1 = today - start
+                            var diff2 = end - today
                             var currDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
-                            if (parseInt(diff1 / currDay) <= 0 && parseInt(diff2 / currDay) >= 0) {
-                                console.log(parseInt(diff1 / currDay))
+
+                            
+                            if (parseInt(diff1 / currDay) >= 0 && parseInt(diff2 / currDay) >= 0) {
                                 responseData[0] = '1'//리포트 작성기간이 맞다.
                             }
-                            if(responseData[0]==null){
+                            else{
                                 responseData[0]='0'//리포트 작성기간이 아니다.
                             }
-                            console.log("보낼데이터 입니다.",responseData[0])
+                            // console.log("보낼데이터 입니다.",responseData[0])
                             return res.send(responseData[0])
                             // resolve(rows[0])                       
                         }
                     }
                 })
-            })
-        }
-    
+
 })
 
 router.get('/watchReview', function (req,res) {
