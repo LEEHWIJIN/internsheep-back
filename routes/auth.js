@@ -17,22 +17,22 @@ const signup = joi.object().keys({
     password:joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
 });
 
-router.post('/std/signup',(req,res)=>{
+router.post('/co/signup',(req,res)=>{
     const result = joi.validate(req.body.user, signup);//조건에 맞는지 검사 result 가 뱉는 에러메세지로 나중에 프론트에서 띄워줘야함
     if(result.error === null){
-        var sql1 = 'select sLoginID from student where sLoginID = ?'
-        var sLoginID = req.body.user.id
+        var sql1 = 'select cLoginID from company where cLoginID = ?'
+        var cLoginID = req.body.user.id
         
-        conn.init().query(sql1,sLoginID,function(err,rows){
+        conn.init().query(sql1,cLoginID,function(err,rows){
             if(err) console.log(err)
             else {
                 if(rows.length == 0){
                     bcrypt.hash(req.body.user.password, 12).then(hashed => {
-                        var sql2 = 'insert into student (sName, sPassword, sLoginID) values(?,?,?) '
-                        var sName = req.body.user.name
-                        var sLoginID = req.body.user.id
-                        var sPassword = hashed
-                        var params = [sName, sPassword, sLoginID]
+                        var sql2 = 'insert into company (cName, cPassword, cLoginID) values(?,?,?) '
+                        var cName = req.body.user.name
+                        var cLoginID = req.body.user.id
+                        var cPassword = hashed
+                        var params = [cName, cPassword, cLoginID]
                         conn.init().query(sql2, params, function(err,rows){
                             if(err) console.log(err)
                             else {
@@ -75,35 +75,44 @@ router.post('/std/signup',(req,res)=>{
 })
 
 router.post('/std/login',(req,res)=>{
-    var sql1 = 'select sPassword,sLoginID,sName,sID from student where sLoginID = ?'
+    var sql1 = 'select sPassword,sLoginID,sName,sID,certification from student where sLoginID = ?'
     var sLoginID = req.body.user.id
     conn.init().query(sql1, sLoginID, function(err,rows){
         if(err) console.log(err)
         else{
             if(rows.length == 1){
-                bcrypt.compare(req.body.user.password,rows[0].sPassword).then(function(result){
-                    if(result){
-                        const payload = {
-                            sId: rows[0].sID,
-                            name: rows[0].sName,
-                            loginId: rows[0].sLoginID
-                        };
-                        jwt.sign(payload, SECRET,{
-                            expiresIn: '1d'
-                        },(err, token) => {
-                            if(err){
-                                console.log(err)
-                                return res.status(404).json({error:'토큰만료'});
-                            }
-                            else{
-                                res.json({token})
-                            }
-                        });
-                    }
-                    else{
-                        return res.status(404).json({error:'비번틀림'});
-                    }
-                })
+                console.log(rows)
+                if(rows[0].certification == 0)
+                {
+                    console.log('인증 안됨')
+                    return res.status(404).json({error: '인증이 되지 않았습니다.'})
+                }
+                else
+                {
+                    bcrypt.compare(req.body.user.password,rows[0].sPassword).then(function(result){
+                        if(result){
+                            const payload = {
+                                sId: rows[0].sID,
+                                name: rows[0].sName,
+                                loginId: rows[0].sLoginID
+                            };
+                            jwt.sign(payload, SECRET,{
+                                expiresIn: '1d'
+                            },(err, token) => {
+                                if(err){
+                                    console.log(err)
+                                    return res.status(404).json({error:'토큰만료'});
+                                }
+                                else{
+                                    res.json({token})
+                                }
+                            });
+                        }
+                        else{
+                            return res.status(404).json({error:'비번틀림'});
+                        }
+                    })
+                }
             }
             else{
                 return res.status(404).json({error:'fail'});
@@ -129,7 +138,7 @@ router.get('/std/dupcheck',function(req,res){
     })
 })
 
-router.post('/co/signup',(req,res)=>{
+router.post('/std/signup',(req,res)=>{
     Promise.resolve()
         .then(signUp)
         .then(certification)
@@ -144,7 +153,7 @@ router.post('/co/signup',(req,res)=>{
         var certificationKey=key_one
         const result = joi.validate(req.body.user, signup);//조건에 맞는지 검사 result 가 뱉는 에러메세지로 나중에 프론트에서 띄워줘야함
         if(result.error === null){
-            var sql1 = 'select cLoginID from company where cLoginID = ?'
+            var sql1 = 'select sLoginID from student where sLoginID = ?'
             var sLoginID = req.body.user.id
             return new Promise(function (resolve, reject)
             {
@@ -153,11 +162,11 @@ router.post('/co/signup',(req,res)=>{
                     else {
                         if(rows.length == 0){
                             bcrypt.hash(req.body.user.password, 12).then(hashed => {
-                                var sql2 = 'insert into company (cName, cPassword, cLoginID, certificationKey) values(?,?,?,?) '
-                                var cName = req.body.user.name
-                                var cLoginID = req.body.user.id
-                                var cPassword = hashed
-                                var params = [cName, cPassword, cLoginID, certificationKey]
+                                var sql2 = 'insert into student (sName, sPassword, sLoginID, certificationKey) values(?,?,?,?) '
+                                var sName = req.body.user.name
+                                var sLoginID = req.body.user.id
+                                var sPassword = hashed
+                                var params = [sName, sPassword, sLoginID, certificationKey]
                                 conn.init().query(sql2, params, function(err,rows){
                                     if(err) res.send(err)
                                     else {
@@ -206,12 +215,12 @@ router.post('/co/signup',(req,res)=>{
     function certification(certificationKey)
     {
         var userEmail = req.body.email
-        var url = 'http://localhost:8888/certification/confirm?certificationKey='+certificationKey+'&cLoginID='+req.body.user.id
+        var url = 'http://localhost:8888/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
         var mailOption = {
             from: mailInfo.auth.user,
             to: userEmail,
             subject: '인턴쉽 메일인증입니다.',
-            text: 'url에 접속해 주세요.<br>' + url
+            text: 'url에 접속해 주세요.  ' + url
         }
 
         mailing.init().sendMail(mailOption, function(err, info)
