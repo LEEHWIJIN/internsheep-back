@@ -1,6 +1,10 @@
 const Router = require('express')
 const router = Router()
 const mysql = require('../db/database_config.js')
+const nodemail = require('../certification/eamil_config')
+const mailInfo = require('../certification/email').test
+const crypto = require('crypto');
+var mailing = nodemail()
 var conn = mysql()
 const joi = require('joi')
 const bcrypt = require('bcrypt')
@@ -126,61 +130,103 @@ router.get('/std/dupcheck',function(req,res){
 })
 
 router.post('/co/signup',(req,res)=>{
-    const result = joi.validate(req.body.user, signup);//조건에 맞는지 검사 result 가 뱉는 에러메세지로 나중에 프론트에서 띄워줘야함
-    if(result.error === null){
-        var sql1 = 'select cLoginID from company where cLoginID = ?'
-        var sLoginID = req.body.user.id
-        
-        conn.init().query(sql1,sLoginID,function(err,rows){
-            if(err) console.log(err)
-            else {
-                if(rows.length == 0){
-                    bcrypt.hash(req.body.user.password, 12).then(hashed => {
-                        var sql2 = 'insert into company (cName, cPassword, cLoginID) values(?,?,?) '
-                        var cName = req.body.user.name
-                        var cLoginID = req.body.user.id
-                        var cPassword = hashed
-                        var params = [cName, cPassword, cLoginID]
-                        conn.init().query(sql2, params, function(err,rows){
-                            if(err) console.log(err)
-                            else {
-                                res.send({result : 1})
-                            }
-                        })
-
-                    })
-                
-                }
-            }
+    Promise.resolve()
+        .then(signUp)
+        .then(certification)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
         })
-    }
-    else
+
+    function signUp()
     {
-        if(result.error.message == 'child "name" fails because ["name" length must be less than or equal to 30 characters long]')
-        {
-            console.log('이름은 30자 이하여야합니다.')
-            res.send('이름은 30자 이하여야합니다.')
-        }
-        else if(result.error.message == 'child "name" fails because ["name" length must be at least 2 characters long]')
-        {
-            console.log('이름은 한글자 이상이여야합니다.')
-            res.send('이름은 한글자 이상이여야합니다.')
-        }
-        else if(result.error.message == 'child "id" fails because ["id" length must be at least 4 characters long]')
-        {
-            console.log('아이디는 최소 4글자 이상이여야합니다.')
-            res.send('아이디는 최소 4글자 이상이여야합니다.')
-        }
-        else if(result.error.message == 'child "id" fails because ["id" length must be less than or equal to 30 characters long]')
-        {
-            console.log('아이디는 최대 30글자입니다.')
-            res.send('아이디는 최대 30글자입니다.')
+        var key_one=crypto.randomBytes(256).toString('hex').substr(100, 5);
+        var certificationKey=key_one
+        const result = joi.validate(req.body.user, signup);//조건에 맞는지 검사 result 가 뱉는 에러메세지로 나중에 프론트에서 띄워줘야함
+        if(result.error === null){
+            var sql1 = 'select cLoginID from company where cLoginID = ?'
+            var sLoginID = req.body.user.id
+            return new Promise(function (resolve, reject)
+            {
+                conn.init().query(sql1,sLoginID,function(err,rows){
+                    if(err) console.log(err)
+                    else {
+                        if(rows.length == 0){
+                            bcrypt.hash(req.body.user.password, 12).then(hashed => {
+                                var sql2 = 'insert into company (cName, cPassword, cLoginID, certificationKey) values(?,?,?,?) '
+                                var cName = req.body.user.name
+                                var cLoginID = req.body.user.id
+                                var cPassword = hashed
+                                var params = [cName, cPassword, cLoginID, certificationKey]
+                                conn.init().query(sql2, params, function(err,rows){
+                                    if(err) res.send(err)
+                                    else {
+                                        console.log(certificationKey)
+                                        console.log('회원가입 완료')
+                                        resolve(certificationKey)
+                                    }
+                                })
+
+                            })
+                        
+                        }
+                    }
+                })
+            })
         }
         else
         {
-            console.log(result.error.message)
-            res.json(result.error);//조건에 안맞을때
+            if(result.error.message == 'child "name" fails because ["name" length must be less than or equal to 30 characters long]')
+            {
+                console.log('이름은 30자 이하여야합니다.')
+                res.send('이름은 30자 이하여야합니다.')
+            }
+            else if(result.error.message == 'child "name" fails because ["name" length must be at least 2 characters long]')
+            {
+                console.log('이름은 한글자 이상이여야합니다.')
+                res.send('이름은 한글자 이상이여야합니다.')
+            }
+            else if(result.error.message == 'child "id" fails because ["id" length must be at least 4 characters long]')
+            {
+                console.log('아이디는 최소 4글자 이상이여야합니다.')
+                res.send('아이디는 최소 4글자 이상이여야합니다.')
+            }
+            else if(result.error.message == 'child "id" fails because ["id" length must be less than or equal to 30 characters long]')
+            {
+                console.log('아이디는 최대 30글자입니다.')
+                res.send('아이디는 최대 30글자입니다.')
+            }
+            else
+            {
+                console.log(result.error.message)
+                res.json(result.error);//조건에 안맞을때
+            }
         }
+    }
+    function certification(certificationKey)
+    {
+        var userEmail = req.body.email
+        var url = 'http://localhost:8888/certification/confirm?certificationKey='+certificationKey+'&cLoginID='+req.body.user.id
+        var mailOption = {
+            from: mailInfo.auth.user,
+            to: userEmail,
+            subject: '인턴쉽 메일인증입니다.',
+            text: 'url에 접속해 주세요.<br>' + url
+        }
+
+        mailing.init().sendMail(mailOption, function(err, info)
+        {
+            if(err) 
+            {
+                res.send(err);
+                console.log(err);
+            }
+            else
+            {
+                console.log('Email sent: ' + info.response)
+                res.send('이메일을 확인해주세요.')
+            }
+        })
     }
 })
 
