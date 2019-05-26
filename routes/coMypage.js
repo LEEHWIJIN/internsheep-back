@@ -813,11 +813,13 @@ router.post('/changeYNApplyStd', function(req, res)
     .then(makeSql2)
     .then(makeInternDetail1)
     .then(endRecruitment)
-    .then(makeInternDetail2)
+    .then(InternTerm)
+        .then(makeInternDetail2)
     .catch(function (err) {
         console.log('Error', err)
         process.exit()
     })
+
     function makeSql1()
     {
         var sql = 'UPDATE stdApplyCo SET YN = CASE stdApplyCoID '
@@ -841,6 +843,7 @@ router.post('/changeYNApplyStd', function(req, res)
             resolve(param)
         })
     }
+
     function makeSql2(param)
     {
         sql = param[0] + 'ELSE YN END WHERE stdApplyCoID IN (?'
@@ -953,30 +956,95 @@ router.post('/changeYNApplyStd', function(req, res)
             }
         })
     }
-    function makeInternDetail2 (stdApplyCoIDs)
-    {
-        var sql = 'INSERT INTO internDetail (stdApplyCoID) VALUES (?)'
+
+    function InternTerm(stdApplyCoIDs) {
+        var sql1 = 'SELECT internTermStart, internTermEnd FROM companyNotice natural join company natural join applyNotice natural join applyTerm where cLoginID =? and applySemester =?'
+        var params = [req.body.cLoginID, req.body.applySemester]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql1, params, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    console.log(rows)
+                    var internTerm = [rows[0].internTermStart, rows[0].internTermEnd]
+                    resolve(stdApplyCoIDs, internTerm)
+                }
+            })
+        })
+    }
+
+    function makeInternDetail2(stdApplyCoIDs,internTerm) {
+        var sql = 'INSERT INTO internDetail (stdApplyCoID, attendence) VALUES (?,?)'
         var index = 1
-        while(stdApplyCoIDs[index])
-        {
-            sql += ', (?)'
+        while (stdApplyCoIDs[index]) {
+            sql += ', (?,?)'
             index++
         }
+        var start = internTerm[0]
+        var end = internTerm[1]
+        var startYear = start.getFullYear()
+        var startDate = start.getDate()
+        console.log(startDate)
+        var startMonth = start.getMonth()+1
+        var diff = end - start
+        var currDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
+        var diffDay = parseInt(diff / currDay) + 1
+        var index = 0
+        var attendenceArray = new Array()
+        for (var i = 0; i < diffDay; i++) {
+            var plusDate = startDate + index
+            var determineYear = startYear
+            var determineMonth = startMonth
+            if (startMonth == 1 || startMonth == 3 || startMonth == 5 || startMonth == 7 || startMonth == 8 || startMonth == 10 || startMonth == 12) {
+                if (plusDate > 31) {
+                    if (startYear == 12) {
+                        determineYear++
+                        determineMonth = 1
+                    }
+                    else determineMonth++
+                    plusDate -= 31
+                }
+            }
+            else if (startMonth == 2) {
+                if (startMonth % 4 == 0) {
+                    if (plusDate > 29) {
+                        determineMonth++
+                        plusDate -= 29
+                    }
+                }
+
+                else {
+                    if (plusDate > 28) {
+                        determineMonth++
+                        plusDate -= 28
+                    }
+                }
+            }
+            else {
+                if (plusDate > 30) {
+                    determineMonth++
+                    plusDate -= 30
+                }
+            }
+            var determineDay = determineYear + '-' + determineMonth + '-' + plusDate
+            attendenceArray.push({"id" : determineDay, "val" : "출석"})
+            index++
+        }
+        var jsonType = JSON.stringify(attendenceArray)
+        var params = new Array()
+        for(var z = 0 ; z<stdApplyCoIDs.length ; z++){
+            params,push(stdApplyCoIDs[z], jsonType)
+        }
         return new Promise(function (resolve, reject) {
-            conn.init().query(sql, stdApplyCoIDs, function (err, rows) {
+            conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
-                else
-                {
-                    resolve(stdApplyCoIDs)
+                else {
+                    resolve(rows)
                     res.send('1')
                 }
             })
         })
     }
 })
-
-
-
 
 router.get('/showCompanyInfo', function(req, res)
 {
@@ -1101,5 +1169,73 @@ router.post('/endSelection', function(req, res)
     }
 })
 
+router.get('/loadHiredStd', function(req, res)
+{
+    var cLoginID = req.query.cLoginID
+    var applySemester = req.query.applySemester
+    var sql = 'SELECT * FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE cLoginID = ? and applySemester =?'
+    var params = [cLoginID, applySemester]
+    conn.init().query(sql, params, function(err, rows)
+    {
+        if(err) console.log(err)
+        else
+        {
+            console.log(rows)
+            res.send(rows)
+        }
+    })
+})
+
+router.post('/changeAttend', function(req, res)
+{
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function first() {
+        var sql = 'SELECT internID, attendence FROM student natural join stdApplyCo natural join applyNotice natural join applyTerm natural join internDetail WHERE sLoginID=? and applySemester = ?'
+        var applySemester = req.body.applySemester
+        var sLoginID = req.body.sLoginID
+        var params = [sLoginID, applySemester]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, params, function (err, rows) {
+                if (err) reject(err)
+                else {
+                    resolve(rows[0])
+                }
+            })
+        })
+    }
+    function second(data)
+    {
+        console.log(data)
+        var sql = "UPDATE internDetail set attendence =? where internID = ?"
+        var beforeAttendence = JSON.parse(data.attendence)
+        var afterAttendence = new Array()
+        for(var i =0 ;i<beforeAttendence.length ; i++){
+            if(beforeAttendence[i].id == req.body.selectDay){
+                afterAttendence.push({"id" : beforeAttendence[i].id, "val" : "결석"})
+            }
+            else afterAttendence.push({"id" : beforeAttendence[i].id, "val" : "출석"})
+        }
+        var jsonType = JSON.stringify(afterAttendence)
+        console.log(jsonType)
+        var params = [jsonType,data.internID]
+        return new Promise(function (resolve, reject) {
+            conn.init().query(sql, params, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    console.log(rows)
+                    resolve(rows)
+                  res.send('1')
+                }
+            })
+        })
+    }
+})
 
 module.exports = router
