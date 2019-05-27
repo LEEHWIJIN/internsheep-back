@@ -671,11 +671,13 @@ router.post('/giveup', function(req, res)
 })
 
 router.get('/checkPickCo',function(req,res){
-    var sql='select * from student natural join company natural join companyNotice join applyNotice natural join stdPickCo natural join applyTerm where sLoginID = ? and cName = ? and applySemester =? and applyOrder=?'
+    var sql='select * from student natural join company natural join companyNotice natural join applyNotice natural join stdPickCo natural join applyTerm where sLoginID = ? and cName = ? and applySemester =? and applyOrder=?'
         var params = [req.query.sLoginID,req.query.cName, req.query.applySemester, req.query.applyOrder]
+        //console.log('query : '+ req.query.cName)
         conn.init().query(sql,params,function(err,rows){
             if(err) console.log(err)
             else{
+                console.log(rows[0])
                 if(rows[0]==null){
                     res.send('0')//찜한적 없음
                 }
@@ -716,7 +718,7 @@ router.post('/postStdPickCo', function (req, res) {
                 if (err) console.log(err)
                 else {
                     console.log(rows)
-                    resolve(rows)
+                    res.send('0')
                 }
             })
         })
@@ -732,6 +734,7 @@ router.get('/watchStdPickCo', function (req,res) {
     conn.init().query(sql, params, function (err, rows) {
         if(err) console.log(err)
         else{
+            console.log("dddddddddddddddddddddddddddddd",rows)
             if(rows[0]==null){
                 res.send('')
             }
@@ -772,7 +775,7 @@ router.post('/deleteStdPickCo', function (req, res) {
                 if (err) console.log(err)
                 else {
                     console.log(rows)
-                    resolve(rows)
+                    res.send('0')
                 }
             })
         })
