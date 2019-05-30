@@ -1217,8 +1217,8 @@ router.post('/changeAttend', function(req, res)
         var beforeAttendence = JSON.parse(data.attendence)
         var afterAttendence = new Array()
         for(var i =0 ;i<beforeAttendence.length ; i++){
-            if(beforeAttendence[i].id == req.body.selectDay){
-                afterAttendence.push({"id" : beforeAttendence[i].id, "val" : "결석"})
+            if(beforeAttendence[i].id == req.body.id){
+                afterAttendence.push({"id" : beforeAttendence[i].id, "val" : req.body.val})
             }
             else afterAttendence.push({"id" : beforeAttendence[i].id, "val" : "출석"})
         }
