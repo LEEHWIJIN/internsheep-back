@@ -1032,7 +1032,7 @@ router.post('/changeYNApplyStd', function(req, res)
         var jsonType = JSON.stringify(attendenceArray)
         var params = new Array()
         for(var z = 0 ; z<stdApplyCoIDs.length ; z++){
-            params,push(stdApplyCoIDs[z], jsonType)
+            params.push(stdApplyCoIDs[z], jsonType)
         }
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
@@ -1173,7 +1173,7 @@ router.get('/loadHiredStd', function(req, res)
 {
     var cLoginID = req.query.cLoginID
     var applySemester = req.query.applySemester
-    var sql = 'SELECT * FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE cLoginID = ? and applySemester =?'
+    var sql = 'SELECT sLoginID,sName FROM student natural join company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE cLoginID = ? and applySemester =?'
     var params = [cLoginID, applySemester]
     conn.init().query(sql, params, function(err, rows)
     {
@@ -1198,8 +1198,8 @@ router.post('/changeAttend', function(req, res)
 
     function first() {
         var sql = 'SELECT internID, attendence FROM student natural join stdApplyCo natural join applyNotice natural join applyTerm natural join internDetail WHERE sLoginID=? and applySemester = ?'
-        var applySemester = req.body.applySemester
-        var sLoginID = req.body.sLoginID
+        var applySemester = req.body.data.applySemester
+        var sLoginID = req.body.data.sLoginID
         var params = [sLoginID, applySemester]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
@@ -1217,8 +1217,8 @@ router.post('/changeAttend', function(req, res)
         var beforeAttendence = JSON.parse(data.attendence)
         var afterAttendence = new Array()
         for(var i =0 ;i<beforeAttendence.length ; i++){
-            if(beforeAttendence[i].id == req.body.id){
-                afterAttendence.push({"id" : beforeAttendence[i].id, "val" : req.body.val})
+            if(beforeAttendence[i].id == req.body.data.id){
+                afterAttendence.push({"id" : beforeAttendence[i].id, "val" : req.body.data.val})
             }
             else afterAttendence.push({"id" : beforeAttendence[i].id, "val" : "출석"})
         }
