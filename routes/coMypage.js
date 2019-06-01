@@ -1169,6 +1169,21 @@ router.post('/endSelection', function(req, res)
     }
 })
 
+router.get('/loadInterTerm',function(req,res){
+    var sql1 = 'SELECT internTermStart, internTermEnd FROM companyNotice natural join company natural join applyNotice natural join applyTerm where cLoginID =? and applySemester =?'
+    var params = [req.query.cLoginID, req.query.applySemester]
+    return new Promise(function (resolve, reject) {
+        conn.init().query(sql1, params, function (err, rows) {
+            if (err) reject(err)
+            else {
+                console.log(rows)
+                var internTerm = [rows[0].internTermStart, rows[0].internTermEnd]
+                res.send(internTerm)
+            }
+        })
+    })
+})
+
 router.get('/loadHiredStd', function(req, res)
 {
     var cLoginID = req.query.cLoginID
