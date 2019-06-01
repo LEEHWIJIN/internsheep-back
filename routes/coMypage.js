@@ -1013,6 +1013,7 @@ router.post('/modifyCompanyInfo', function(req, res)
         }
     })
 })
+
 router.post('/endSelection', function(req, res)
 {
     Promise.resolve()
@@ -1101,5 +1102,71 @@ router.post('/endSelection', function(req, res)
     }
 })
 
+router.post('/changeCstatus', function (req, res) {
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function first() {
+        return new Promise(function (resolve,reject) {
+            var sql1 = 'SELECT applyNoticeID, cStatus FROM company natural join companyNotice NATURAL JOIN applyNotice natural join applyTerm WHERE cLoginID = ? and applySemester =? and applyOrder =?'
+            var cLoginID = req.body.cLoginID
+            var applySemester = req.body.applySemester
+            var applyOrder = req.body.applyOrder
+            var params = [cLoginID, applySemester, applyOrder]
+            conn.init().query(sql1, params,function (err,rows) {
+                if(err) console.log(err)
+                else{
+                    if(rows[0].cStatus == 1){
+                        resolve('이미 지원마감 함')
+                    }
+                    else {
+                        console.log(rows)
+                        resolve(rows[0])
+                    }
+                }
+            })
+        })
+    }
+
+    function second(data) {
+        return new Promise(function (resolve,reject) {
+            if(data == '이미 지원마감 함')
+            {
+                res.send('0')
+                resolve()
+            }
+            else {
+                var sql2 = 'UPDATE applyNotice SET cStatus = 1 WHERE applyNoticeID = ?'
+                conn.init().query(sql2, data.applyNoticeID, function (err, rows) {
+                    if (err) console.log(err)
+                    else {
+                        console.log(rows)
+                        res.send(rows)
+                        resolve()
+                    }
+                })
+            }
+        })
+    }
+})
+
+router.get('/loadCstatus', function (req,res) {
+    var sql = 'SELECT cStatus FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm WHERE cLoginID = ? and applySemester=? and applyOrder =?'
+    var cLoginID = req.query.cLoginID
+    var applySemester = req.query.applySemester
+    var applyOrder = req.query.applyOrder
+    var params = [cLoginID, applySemester, applyOrder]
+    conn.init().query(sql, params, function (err, rows) {
+        if(err) console.log(err)
+        else{
+            res.send(rows[0])
+        }
+    })
+})
 
 module.exports = router

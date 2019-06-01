@@ -342,6 +342,32 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
+    var sql = 'SELECT YN FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student natural join applyTerm WHERE sLoginID = ? and applySemester =?'
+    var sLoginID = req.query.sLoginID
+    var applySemester = req.query.applySemester
+    var params = [sLoginID, applySemester]
+    conn.init().query(sql, params, function (err, rows) {
+        if (err) console.log(err)
+        else {
+            console.log(rows)
+            if (rows[0] == null) {
+                console.log('지원 이력 없음')
+                return res.send('지원 이력 없음')
+            } else {
+                if(rows[0].YN==2 || rows[0].YN ==0){
+                    console.log('포기나 불합격 상태')
+                    return res.send('포기나 불합격 상태')
+                }
+                else {
+                    console.log('합격하거나 심사중 상태')
+                    return res.send('합격하거나 심사중 상태')
+                }
+            }
+        }
+    })
+})
+
+router.get('/loadApplyAll', function (req, res) {
     var sql = 'SELECT cName, YN, cImage, cOccupation, applyOrder FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student natural join applyTerm WHERE sLoginID = ? and applySemester =?'
     var sLoginID = req.query.sLoginID
     var applySemester = req.query.applySemester
@@ -351,11 +377,11 @@ router.get('/applyStatus', function (req, res) {
         else {
             console.log(rows)
             if (rows[0] == null) {
-                console.log('값이 없음')
-                return res.send('0')
+                console.log('지원 이력 없음')
+                return res.send('지원 이력 없음')
             } else {
-                console.log('값이 있음')
-                return res.json(rows)
+                    console.log('합격하거나 심사중 상태')
+                    return res.json(rows)
             }
         }
     })
@@ -671,41 +697,43 @@ router.post('/giveup', function(req, res)
 })
 
 router.get('/checkPickCo',function(req,res){
-    Promise.resolve()
-        .then(findstdPickCoID)
-        .then(findPickCo)
-        .catch(function (err) {
-            console.log('Error', err)
-            process.exit()
-        })
-    function findstdPickCoID() {
-        var sql1='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
-        var params1 = [req.query.sLoginID, req.query.cName]
-        conn.init().query(sql1,params1,function(err,rows){
-            if(err) console.log(err)
-            else{
+    // Promise.resolve()
+    //     .then(findstdPickCoID)
+    //     .then(findPickCo)
+    //     .catch(function (err) {
+    //         console.log('Error', err)
+    //         process.exit()
+    //     })
+    // function findstdPickCoID() {
+    //     var sql1='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
+    //     var params1 = [req.query.sLoginID, req.query.cName]
+    //     conn.init().query(sql1,params1,function(err,rows){
+    //         if(err) console.log(err)
+    //         else{
+    //             console.log(rows[0])
+    //             resolve(rows[0])
+    //         }
+    //     })
+    // }
+    // function findPickCo(ID) {
+        var sql = 'select * from student natural join company natural join companyNotice natural join applyNotice natural join stdPickCo natural join applyTerm where sLoginID = ? and cName = ? and applySemester =? and applyOrder=?'
+        var params = [req.query.sLoginID, req.query.cName, req.query.applySemester, req.query.applyOrder]
+        //console.log('query : '+ req.query.cName)
+        conn.init().query(sql, params, function (err, rows) {
+
+            if (err) console.log(err)
+            else {
                 console.log(rows[0])
-                resolve(rows[0])
+                if (rows[0] == null) {
+                    res.send('0')//찜한적 없음
+                }
+                else {
+                    res.send('1')//찜했음
+                }
+
             }
         })
-    }
-    function findPickCo(ID){
-        console.log(ID)
-        var sql2='select stdPickCoID from stdPickCo where sID = ? and cID = ?'
-        var params2 = [ID.sID, ID.cID]
-        conn.init().query(sql2,params2,function(err,rows){
-            if(err) console.log(err)
-            else{
-                console.log(rows)
-                if(rows.length==0){//No std pick co
-                    res.send({result:0})
-                }
-                else{
-                    res.send({result:1})
-                }
-            }
-        })
-    }
+    //}
 })
 
 router.post('/postStdPickCo', function (req, res) {
@@ -718,7 +746,7 @@ router.post('/postStdPickCo', function (req, res) {
         })
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql1 = 'select sID, cID, sLoginID, cName from student join company where student.sLoginID = ? and company.cName = ?'
+            var sql1 = 'select sID, applyNoticeID, sLoginID, cName from student join company join companyNotice join applyNotice where student.sLoginID = ? and company.cName = ? and companyNotice.cID = company.cID and companyNotice.cNoticeID = applyNotice.cNoticeID'
             var params1 = [req.body.sLoginID, req.body.cName]
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
@@ -731,13 +759,13 @@ router.post('/postStdPickCo', function (req, res) {
     }
     function second(data) {
         return new Promise(function (resolve, reject) {
-            var sql2 = 'INSERT INTO stdPickCo (sID, cID) VALUES(?,?)'
-            var params2 = [data.sID, data.cID]
+            var sql2 = 'INSERT INTO stdPickCo (sID, applyNoticeID) VALUES(?,?)'
+            var params2 = [data.sID, data.applyNoticeID]
             conn.init().query(sql2, params2, function (err, rows) {
                 if (err) console.log(err)
                 else {
                     console.log(rows)
-                    resolve(rows)
+                    res.send('0')
                 }
             })
         })
@@ -753,6 +781,7 @@ router.get('/watchStdPickCo', function (req,res) {
     conn.init().query(sql, params, function (err, rows) {
         if(err) console.log(err)
         else{
+            console.log("dddddddddddddddddddddddddddddd",rows)
             if(rows[0]==null){
                 res.send('')
             }
@@ -773,8 +802,8 @@ router.post('/deleteStdPickCo', function (req, res) {
         })
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql1 = 'select stdPickCoID from student natural join stdPickCo natural join company where sLoginID = ? AND cName =?'
-            var params1 = [req.body.sLoginID, req.body.cName]
+            var sql1 = 'select stdPickCoID from student natural join stdPickCo natural join company natural join companyNotice natural join applyNotice natural join applyTerm where sLoginID = ? AND cName =? AND applySemester =? and applyOrder =?'
+            var params1 = [req.body.sLoginID, req.body.cName, req.body.applySemester, req.body.applyOrder]
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else{
@@ -793,7 +822,7 @@ router.post('/deleteStdPickCo', function (req, res) {
                 if (err) console.log(err)
                 else {
                     console.log(rows)
-                    resolve(rows)
+                    res.send('0')
                 }
             })
         })

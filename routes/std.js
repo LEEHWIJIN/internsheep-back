@@ -5,8 +5,9 @@ var conn = mysql()
 
 
 router.get('/list', function(req, res){
-    var sql = 'SELECT * FROM applyTerm at NATURAL JOIN applyNotice an NATURAL JOIN companyNotice cn NATURAL JOIN company co WHERE at.applySemester =? and at.applyOrder =?'
+    var sql = 'SELECT * FROM applyTerm at NATURAL JOIN applyNotice an NATURAL JOIN companyNotice cn NATURAL JOIN company co WHERE at.applySemester =? and at.applyOrder =? and cStatus = 0'
     var params = [req.query.applySemester, req.query.applyOrder]
+    console.log('zzzz')
     conn.init().query(sql,params,function(err, rows){
         var responseData= []
         if(err) console.log(err)
