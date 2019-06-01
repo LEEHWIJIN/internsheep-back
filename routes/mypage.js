@@ -679,20 +679,21 @@ router.get('/checkPickCo',function(req,res){
             process.exit()
         })
     function findstdPickCoID() {
-        var sql='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
-        var params = [req.query.sLoginID,req.query.cName]
-        conn.init().query(sql,params,function(err,rows){
+        var sql1='select sID, cID from student join company where student.sLoginID = ? and company.cName = ?'
+        var params1 = [req.query.sLoginID, req.query.cName]
+        conn.init().query(sql1,params1,function(err,rows){
             if(err) console.log(err)
             else{
-                console.log(rows)
+                console.log(rows[0])
                 resolve(rows[0])
             }
         })
     }
     function findPickCo(ID){
-        var sql='select stdPickCoID from stdPickCo where sID = ? and cID = ?'
-        var params = [ID.sID, ID.cID]
-        conn.init().query(sql,params,function(err,rows){
+        console.log(ID)
+        var sql2='select stdPickCoID from stdPickCo where sID = ? and cID = ?'
+        var params2 = [ID.sID, ID.cID]
+        conn.init().query(sql2,params2,function(err,rows){
             if(err) console.log(err)
             else{
                 console.log(rows)
