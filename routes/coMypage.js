@@ -319,8 +319,10 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
     })
 
     function getCompanyNotice() {
+        console.log('getCompanyNotice...')
         var sql = 'SELECT * FROM company WHERE cLoginID = ?'
         var cLoginID = req.body.cLoginID
+        console.log(cLoginID+'...')
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
@@ -334,6 +336,7 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
     }    
     function writeLocation (cID, cLoginID)
     {
+        console.log('writeLocation...')
         var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
         var location = req.body.cLocation
         var sqlParams = [location, cID]
@@ -348,12 +351,13 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
             })
         })
     }
-    function writeCompanyNotice(cID) 
+    function writeCompanyNotice(cID, cLoginID) 
     {   
-        var start = new Date(req.body.data.internTermStart)
-        var end = new Date(req.body.data.internTermEnd)
-        var benefit = req.body.data.cBenefit
-        var pay = req.body.data.cPay
+        console.log('writeCompanyNotice...')
+        var start = new Date(req.body.internTermStart)
+        var end = new Date(req.body.internTermEnd)
+        var benefit = req.body.cBenefit
+        var pay = req.body.cPay
         var startYear = start.getFullYear()
         var startMonth = start.getMonth()
         var startDate = start.getDate()
@@ -362,9 +366,9 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
         var endDate = end.getDate() 
         var internTermEnd = new Date(endYear,endMonth, endDate, 32, 59,59)
         var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
-        var occupation = req.body.data.cOccupation
-        var numOfPeople = req.body.data.cNumOfPeople
-        var tag = req.body.data.cTag
+        var occupation = req.body.cOccupation
+        var numOfPeople = req.body.cNumOfPeople
+        var tag = req.body.cTag
 
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
         var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
@@ -381,6 +385,7 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
     }
     function uploadImage(cLoginID)
     {
+        console.log('uploading...')
         var loginID = cLoginID
         var sql = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
         var image = req.file
@@ -420,16 +425,16 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
         return new Promise(function (resolve,reject)
         {
             console.log(image.path+' deleting...')
-            res.send('1')
-            // fs.unlink(image.path, function(err)
-            // {
-            //     if(err) console.log(err)
-            //     else
-            //     {
-            //         res.send('1')
-            //             console.log('successfully upload image and deleted temp image')
-            //     }
-            // })
+
+            fs.unlink(image.path, function(err)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    res.send('1')
+                    console.log('successfully upload image and deleted temp image')
+                }
+            })
         })
     }
 })
