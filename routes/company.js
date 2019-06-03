@@ -41,4 +41,18 @@ router.post('/addTag', function(req,res)
     })
 })
 
+router.get('/getProfileImage', function(req,res)
+{
+    var name = req.query.cName
+    var sql = 'SELECT cName, cImage FROM company WHERE cName = ?'
+    conn.init().query(sql, name, function(err, rows)
+    {
+        if(err) res.send(err)
+        else
+        {
+            
+        }
+    })
+})
+
 module.exports = router

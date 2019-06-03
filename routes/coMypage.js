@@ -2,6 +2,19 @@ const Router = require('express')
 const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
+let multer = require('multer')
+var fs = require("fs")
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './temp/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+    },
+    filename: function (req, file, cb) {
+        console.log(req.body)
+        cb(null, file.originalname)
+    }
+})
+
+var upload = multer({storage: storage})
 
 
 
@@ -1167,6 +1180,74 @@ router.get('/loadCstatus', function (req,res) {
             res.send(rows[0])
         }
     })
+})
+
+function getFilesizeInBytes(filename) {
+    const stats = fs.statSync(filename);
+    const fileSizeInBytes = stats.size;
+    return fileSizeInBytes;
+}
+
+router.post('/uploadImage', upload.single('file'), function(req, res)
+{
+    Promise.resolve()
+    .then(uploadImage)
+    .then(deleteTempImage)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
+    })
+
+    function uploadImage()
+    {
+        var loginID = req.body.sLoginID
+        var sql = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+        var image = req.file
+        return new Promise(function (resolve,reject) {
+            fs.open(image.path, 'r', function(status, fd)
+            {
+                if (status)
+                {
+                    console.log(status.message)
+                    return
+                }
+                var buffer = new Buffer(getFilesizeInBytes(image.path))
+                fs.read(fd, buffer, 0, 100, 0, function(err,num)
+                {
+                    var sqlParams = [buffer, loginID]
+                    conn.init().query(sql, sqlParams, function(err, rows)
+                    {
+                        if(err)
+                        {
+                            console.log(err)
+                            res.send(err)
+                        }
+                        else
+                        {
+                            console.log(rows)
+                            res.send(rows)
+                            resolve(image)
+                        }
+                    })
+                })
+            })
+        })
+    }
+    function deleteTempImage(image)
+    {
+        return new Promise(function (resolve,reject)
+        {
+            console.log(image.path+' deleting...')
+            fs.unlink(image.path, function(err)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    console.log('successfully upload image and deleted temp image')
+                }
+            })
+        })
+    }
 })
 
 module.exports = router
