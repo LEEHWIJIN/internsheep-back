@@ -298,19 +298,27 @@ router.get('/watchNotice', function(req, res){
     })
 })
 
-router.post('/modifyNotice', function(req, res)
+function getFilesizeInBytes(filename) {
+    const stats = fs.statSync(filename);
+    const fileSizeInBytes = stats.size;
+    return fileSizeInBytes;
+}
+
+router.post('/modifyNotice', upload.single('file'), function(req, res)
 {
     Promise.resolve()
     .then(getCompanyNotice)
     .then(writeLocation)
     .then(writeCompanyNotice)
+        .then(uploadImage)
+        .then(deleteTempImage)
     .catch(function (err) {
         console.log('Error', err)
         process.exit()
     })
 
     function getCompanyNotice() {
-        var sql = 'SELECT* FROM company WHERE cLoginID = ?'
+        var sql = 'SELECT * FROM company WHERE cLoginID = ?'
         var cLoginID = req.body.cLoginID
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
@@ -318,15 +326,15 @@ router.post('/modifyNotice', function(req, res)
                 else
                 {
                     console.log(rows.cID)
-                    resolve(rows[0].cID)
+                    resolve(rows[0].cID, rows[0].cLoginID)
                 }
             })
         })
     }    
-    function writeLocation (cID)
+    function writeLocation (cID, cLoginID)
     {
         var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
-        var location = req.body.data.cLocation
+        var location = req.body.cLocation
         var sqlParams = [location, cID]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
@@ -334,22 +342,23 @@ router.post('/modifyNotice', function(req, res)
                 else
                 {
                     console.log(rows)
-                    resolve(cID)
+                    resolve(cID,cLoginID)
                 }
             })
         })
     }
-    function writeCompanyNotice(cID) 
+
+    function writeCompanyNotice(cID,cLoginID)
     {
-        var benefit = req.body.data.cBenefit
-        var pay = req.body.data.cPay
-        var start = req.body.data.internTermStart.split('-')
-        var end = req.body.data.internTermEnd.split('-')
+        var benefit = req.body.cBenefit
+        var pay = req.body.cPay
+        var start = req.body.internTermStart.split('-')
+        var end = req.body.internTermEnd.split('-')
         var internTermEnd = new Date(end[0],end[1]-1, end[2], 41, 59,59)
         var internTermStart = new Date(start[0],start[1]-1, start[2], 18, 0,0)
-        var occupation = req.body.data.cOccupation
-        var numOfPeople = req.body.data.cNumOfPeople
-        var tag = req.body.data.cTag
+        var occupation = req.body.cOccupation
+        var numOfPeople = req.body.cNumOfPeople
+        var tag = req.body.cTag
     
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
         var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
@@ -359,10 +368,62 @@ router.post('/modifyNotice', function(req, res)
                 if (err) reject(err)
                 else {
                         console.log(rows)
-                        res.send('1')
-                        resolve(0)
+                        resolve(cLoginID)
                 }
             })
+        })
+    }
+    function uploadImage(cLoginID)
+    {
+        var loginID = cLoginID
+        var sql = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+        var image = req.file
+        return new Promise(function (resolve,reject) {
+            fs.open(image.path, 'r', function(status, fd)
+            {
+                if (status)
+                {
+                    console.log(status.message)
+                    return
+                }
+                var buffer = new Buffer(getFilesizeInBytes(image.path))
+                var fileSize = getFilesizeInBytes(image.path);
+                fs.read(fd, buffer, 0, fileSize, 0, function(err,num)
+                {
+                    var sqlParams = [buffer, loginID]
+                    conn.init().query(sql, sqlParams, function(err, rows)
+                    {
+                        if(err)
+                        {
+                            console.log(err)
+                            res.send(err)
+                        }
+                        else
+                        {
+                            console.log(rows)
+                            resolve(image)
+                        }
+                    })
+                })
+
+            })
+        })
+    }
+    function deleteTempImage(image)
+    {
+        return new Promise(function (resolve,reject)
+        {
+            console.log(image.path+' deleting...')
+            res.send('1')
+            // fs.unlink(image.path, function(err)
+            // {
+            //     if(err) console.log(err)
+            //     else
+            //     {
+            //         res.send('1')
+            //             console.log('successfully upload image and deleted temp image')
+            //     }
+            // })
         })
     }
 })
@@ -815,10 +876,6 @@ router.get('/watchApplyStdNum', function(req, res) {
     }
 })
 
-
-
-
-
 router.post('/changeYNApplyStd', function(req, res)
 {
     Promise.resolve()
@@ -1182,70 +1239,43 @@ router.get('/loadCstatus', function (req,res) {
     })
 })
 
-function getFilesizeInBytes(filename) {
-    const stats = fs.statSync(filename);
-    const fileSizeInBytes = stats.size;
-    return fileSizeInBytes;
-}
-
-router.post('/uploadImage', upload.single('file'), function(req, res)
+router.get('/getProfileImage', function(req,res)
 {
     Promise.resolve()
-    .then(uploadImage)
-    .then(deleteTempImage)
-    .catch(function (err) {
-        console.log('Error', err)
-        process.exit()
-    })
-
-    function uploadImage()
+        .then(loadImage)
+        .then(sendImage)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+    function loadImage()
     {
-        var loginID = req.body.sLoginID
-        var sql = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
-        var image = req.file
-        return new Promise(function (resolve,reject) {
-            fs.open(image.path, 'r', function(status, fd)
+        var cLoginID = req.query.cLoginID
+        var sql = 'SELECT cName, cImage FROM company WHERE cLoginID = ?'
+        return new Promise(function (resolve,reject)
+        {
+            conn.init().query(sql, cLoginID, function(err, rows)
             {
-                if (status)
+                if(err) res.send(err)
+                else
                 {
-                    console.log(status.message)
-                    return
+                    console.log(rows[0].cImage)
+                    var filePath = 'temp/' + cLoginID + 'Profile.png'
+                    fs.writeFileSync(filePath, rows[0].cImage)
+                    // var imageAndPath = [image, ]
+                    resolve(rows[0].cImage)
                 }
-                var buffer = new Buffer(getFilesizeInBytes(image.path))
-                fs.read(fd, buffer, 0, 100, 0, function(err,num)
-                {
-                    var sqlParams = [buffer, loginID]
-                    conn.init().query(sql, sqlParams, function(err, rows)
-                    {
-                        if(err)
-                        {
-                            console.log(err)
-                            res.send(err)
-                        }
-                        else
-                        {
-                            console.log(rows)
-                            res.send(rows)
-                            resolve(image)
-                        }
-                    })
-                })
             })
         })
     }
-    function deleteTempImage(image)
+    function sendImage(image)
     {
         return new Promise(function (resolve,reject)
         {
-            console.log(image.path+' deleting...')
-            fs.unlink(image.path, function(err)
-            {
-                if(err) console.log(err)
-                else
-                {
-                    console.log('successfully upload image and deleted temp image')
-                }
-            })
+            //resolve(filePath)
+            res.writeHead(200, {"Content-Type": "image/png"});
+            res.write(image);
+            res.end();
         })
     }
 })
