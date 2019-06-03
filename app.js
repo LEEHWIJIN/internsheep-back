@@ -10,6 +10,7 @@ const checktoken = require('./middle/checktoken')
 const coMypage = require('./routes/coMypage')
 const mail = require('./routes/mail')
 const certification = require('./routes/certification')
+const company = require('./routes/company')
 const app = express()
 
 app.use((req, res, next) =>{
@@ -38,6 +39,6 @@ app.use('/admin', admin)
 app.use('/co/mypage', coMypage)
 app.use('/mail', mail)
 app.use('/certification', certification)
-
+app.use('/co', company)
 
 module.exports = app

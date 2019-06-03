@@ -7,15 +7,30 @@ var conn = mysql()
 router.get('/list', function(req, res){
     var sql = 'SELECT * FROM applyTerm at NATURAL JOIN applyNotice an NATURAL JOIN companyNotice cn NATURAL JOIN company co WHERE at.applySemester =? and at.applyOrder =? and cStatus = 0'
     var params = [req.query.applySemester, req.query.applyOrder]
-    console.log('zzzz')
     conn.init().query(sql,params,function(err, rows){
         var responseData= []
         if(err) console.log(err)
         else {
             for (var i = 0; i < rows.length; i++) {
+                if(rows[i].internTermStart) {
+                    var startYear = rows[i].internTermStart.getFullYear()
+                    var startMonth = rows[i].internTermStart.getMonth() + 1
+                    var startDate = rows[i].internTermStart.getDate()
+                    var start = startYear + '-' + startMonth + '-' + startDate
+                    rows[i].internTermStart = start
+                }
+                if(rows[i].internTermEnd){
+                    var endYear = rows[i].internTermEnd.getFullYear()
+                    var endMonth = rows[i].internTermEnd.getMonth()+1
+                    var endDate = rows[i].internTermEnd.getDate()
+                    var end =  endYear+'-'+endMonth+'-'+endDate
+                    rows[i].internTermEnd = end
+                }
                 responseData[i] = rows[i]
+                console.log(responseData[i].internTermStart)
+
             }
-            console.log(responseData)
+
             return res.json(responseData)
         }
     })
@@ -42,6 +57,22 @@ router.get('/loadCoReview', function(req, res){
                 res.send('0')
             }
             else {
+                for (var i = 0; i < rows.length; i++) {
+                    if(rows[i].internTermStart) {
+                        var startYear = rows[i].internTermStart.getFullYear()
+                        var startMonth = rows[i].internTermStart.getMonth() + 1
+                        var startDate = rows[i].internTermStart.getDate()
+                        var start = startYear + '-' + startMonth + '-' + startDate
+                        rows[i].internTermStart = start
+                    }
+                    if(rows[i].internTermEnd){
+                        var endYear = rows[i].internTermEnd.getFullYear()
+                        var endMonth = rows[i].internTermEnd.getMonth()+1
+                        var endDate = rows[i].internTermEnd.getDate()
+                        var end =  endYear+'-'+endMonth+'-'+endDate
+                        rows[i].internTermEnd = end
+                    }
+                }
                 return res.json(rows)
             }
         }
