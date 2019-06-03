@@ -242,21 +242,22 @@ router.post('/writeNotice', function(req, res){
     {
         var benefit = req.body.data.cBenefit
         var pay = req.body.data.cPay
-        var start = req.body.data.internTermStart.split('-')
-        var start2 = start[2].split('T')[0]
-        var end = req.body.data.internTermEnd.split('-')
-        var end2 =  end[2].split('T')[0]
-        var internTermEnd = new Date(end[0],end[1]-1, end2, 23, 59,59)
-        var internTermStart = new Date(start[0],start[1]-1, start2, 0, 0,0)
-        // var internTermStart = req.body.data.internTermStart
-        // var internTermEnd = req.body.data.internTermEnd
+        var start = new Date(req.body.data.internTermStart)
+        var end = new Date(req.body.data.internTermEnd)
+        var startYear = start.getFullYear()
+        var startMonth = start.getMonth()
+        var startDate = start.getDate()
+        var endYear = end.getFullYear()
+        var endMonth = end.getMonth()
+        var endDate = end.getDate() 
+        var internTermEnd = new Date(endYear,endMonth, endDate, 32, 59,59)
+        var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
         var info = req.body.data.cInfo
         var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag, cInfo) VALUES(?,?,?,?,?,?,?,?,?)'
         var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, info]
-        console.log(req.body.data.internTermStart.split('-'))
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
@@ -304,7 +305,6 @@ router.post('/modifyNotice', function(req, res)
                 if (err) reject(err)
                 else
                 {
-                    console.log(rows.cID)
                     resolve(rows[0].cID)
                 }
             })
@@ -320,24 +320,29 @@ router.post('/modifyNotice', function(req, res)
                 if (err) reject(err)
                 else
                 {
-                    console.log(rows)
                     resolve(cID)
                 }
             })
         })
     }
     function writeCompanyNotice(cID) 
-    {
+    {   
+        var start = new Date(req.body.data.internTermStart)
+        var end = new Date(req.body.data.internTermEnd)
         var benefit = req.body.data.cBenefit
         var pay = req.body.data.cPay
-        var start = req.body.data.internTermStart.split('-')
-        var end = req.body.data.internTermEnd.split('-')
-        var internTermEnd = new Date(end[0],end[1]-1, end[2], 41, 59,59)
-        var internTermStart = new Date(start[0],start[1]-1, start[2], 18, 0,0)
+        var startYear = start.getFullYear()
+        var startMonth = start.getMonth()
+        var startDate = start.getDate()
+        var endYear = end.getFullYear()
+        var endMonth = end.getMonth()
+        var endDate = end.getDate() 
+        var internTermEnd = new Date(endYear,endMonth, endDate, 32, 59,59)
+        var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
         var occupation = req.body.data.cOccupation
         var numOfPeople = req.body.data.cNumOfPeople
         var tag = req.body.data.cTag
-    
+
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
         var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
     
@@ -345,7 +350,6 @@ router.post('/modifyNotice', function(req, res)
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                        console.log(rows)
                         res.send('1')
                         resolve(0)
                 }
