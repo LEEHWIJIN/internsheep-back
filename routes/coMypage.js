@@ -1176,9 +1176,16 @@ router.get('/loadInterTerm',function(req,res){
         conn.init().query(sql1, params, function (err, rows) {
             if (err) reject(err)
             else {
-                console.log(rows)
-                var internTerm = [rows[0].internTermStart, rows[0].internTermEnd]
-                res.send(internTerm)
+                var startYear = rows[0].internTermStart.getFullYear()
+                var startMonth = rows[0].internTermStart.getMonth()+1
+                var startDate = rows[0].internTermStart.getDate()
+                var start =  startYear+'.'+startMonth+'.'+startDate
+                var endYear = rows[0].internTermEnd.getFullYear()
+                var endMonth = rows[0].internTermEnd.getMonth()+1
+                var endDate = rows[0].internTermEnd.getDate()
+                var end =  endYear+'.'+endMonth+'.'+endDate
+                var data = [start,end]
+                res.send(data)
             }
         })
     })
