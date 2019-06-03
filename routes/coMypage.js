@@ -1177,15 +1177,30 @@ router.get('/loadInterTerm',function(req,res){
             if (err) reject(err)
             else {
                 var startYear = rows[0].internTermStart.getFullYear()
-                var startMonth = rows[0].internTermStart.getMonth()+1
+                var startMonth = rows[0].internTermStart.getMonth()
                 var startDate = rows[0].internTermStart.getDate()
-                var start =  startYear+'.'+startMonth+'.'+startDate
+                var start =  new Date(startYear,startMonth,startDate,9,0,0)
                 var endYear = rows[0].internTermEnd.getFullYear()
-                var endMonth = rows[0].internTermEnd.getMonth()+1
+                var endMonth = rows[0].internTermEnd.getMonth()
                 var endDate = rows[0].internTermEnd.getDate()
-                var end =  endYear+'.'+endMonth+'.'+endDate
-                var data = [start,end]
-                res.send(data)
+                var end =  new Date(endYear,endMonth,endDate,9,0,0)
+                var convert = req.query.date.split('.')
+                var selectYear = convert[0]
+                var selectMonth = convert[1]-1
+                var selectDate = convert[2]
+                var select = new Date(selectYear,selectMonth,selectDate,9,0,0)
+                var diff1 = select - start
+                var diff2 = end - select
+                var currDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
+                console.log(start)
+                console.log(end)
+                    console.log(select)
+                if (parseInt(diff1 / currDay) >= 0 && parseInt(diff2 / currDay) >= 0) {
+                    res.json({result:1})
+                }
+                else {
+                    res.json({result:0})
+                }
             }
         })
     })
