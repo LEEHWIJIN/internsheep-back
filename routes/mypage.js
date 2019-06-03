@@ -640,7 +640,7 @@ router.post('/modifyReview', function (req, res) {
 
 router.get('/showStudentInfo', function(req, res)
 {
-    var sql = 'SELECT * FROM student WHERE sLogin = ?'
+    var sql = 'SELECT * FROM student WHERE sLoginID = ?'
     var loginID = req.query.sLoginID
     conn.init().query(sql, loginID, function(err, rows)
     {
