@@ -285,15 +285,14 @@ router.post('/writeNotice', function(req, res){
 })
 
 router.get('/watchNotice', function(req, res){
+    console.log('watching Notice...')
     var cLoginID = req.query.cLoginID
     var sql = 'SELECT * FROM companyNotice, company WHERE company.cID = companyNotice.cID AND cLoginID = ?'
     conn.init().query(sql, cLoginID, function(err, rows)
     {
-        console.log(cLoginID)
         if(err) console.log(err)
         else
         {
-            console.log(rows)
             res.send(rows)
         }
     })
@@ -318,6 +317,9 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
         process.exit()
     })
 
+    const loginIdNum = 1
+    const cIdNum = 0
+
     function getCompanyNotice() {
         console.log('getCompanyNotice...')
         var sql = 'SELECT * FROM company WHERE cLoginID = ?'
@@ -328,31 +330,32 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
                 if (err) reject(err)
                 else
                 {
-                    console.log(rows.cID)
-                    resolve(rows[0].cID, rows[0].cLoginID)
+                    var resolveParams = [rows[0].cID, rows[0].cLoginID]
+                    resolve(resolveParams)
                 }
             })
         })
     }    
-    function writeLocation (cID, cLoginID)
+    function writeLocation (resolveParams)
     {
+        console.log(resolveParams+' are resolved')
         console.log('writeLocation...')
         var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
         var location = req.body.cLocation
-        var sqlParams = [location, cID]
+        var sqlParams = [location, resolveParams[cIdNum]]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
                 else
                 {
-                    console.log(rows)
-                    resolve(cID,cLoginID)
+                    resolve(resolveParams)
                 }
             })
         })
     }
-    function writeCompanyNotice(cID, cLoginID) 
+    function writeCompanyNotice(resolveParams) 
     {   
+        console.log(resolveParams+' are resolved')
         console.log('writeCompanyNotice...')
         var start = new Date(req.body.internTermStart)
         var end = new Date(req.body.internTermEnd)
@@ -371,22 +374,21 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
         var tag = req.body.cTag
 
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
-        var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
+        var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, resolveParams[cIdNum]]
     
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
-                else {
-                        console.log(rows)
-                        resolve(cLoginID)
+                else {    
+                    resolve(resolveParams)
                 }
             })
         })
     }
-    function uploadImage(cLoginID)
+    function uploadImage(resolveParams)
     {
-        console.log('uploading...')
-        var loginID = cLoginID
+        var loginID = resolveParams[loginIdNum]
+        console.log(resolveParams+' are resolved!')
         var sql = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
         var image = req.file
         return new Promise(function (resolve,reject) {
@@ -404,6 +406,14 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
                     var sqlParams = [buffer, loginID]
                     conn.init().query(sql, sqlParams, function(err, rows)
                     {
+                        fs.close(fd, function(err)
+                        {
+                            if(err) console.log(err.message)
+                            else
+                            {
+                                console.log('file closed')
+                            }
+                        })
                         if(err)
                         {
                             console.log(err)
@@ -411,7 +421,7 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
                         }
                         else
                         {
-                            console.log(rows)
+                            //console.log(rows)
                             resolve(image)
                         }
                     })
@@ -422,10 +432,10 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
     }
     function deleteTempImage(image)
     {
+        if(image) console.log('image resoved!')
         return new Promise(function (resolve,reject)
         {
             console.log(image.path+' deleting...')
-
             fs.unlink(image.path, function(err)
             {
                 if(err) console.log(err)

@@ -56,19 +56,61 @@ router.post('/addTag', function(req,res)
 
 router.get('/getProfileImage', function(req,res)
 {
-    var name = req.query.cName
-    var sql = 'SELECT cName, cImage FROM company WHERE cName = ?'
-    conn.init().query(sql, name, function(err, rows)
-    {
-        if(err) res.send(err)
-        else
-        {
-            const buf = new Buffer(rows[0].cImage, "binary");
-            console.log(rows[0].cImage)
-            fs.writeFileSync('temp/' + name + 'Profile.png', buf)
-            res.send('1')
-        }
+    Promise.resolve()
+    .then(loadImage)
+    .then(sendImage)
+    .then(deleteTempImage)
+    .catch(function (err) {
+        console.log('Error', err)
+        process.exit()
     })
+    function loadImage()
+    {
+        console.log('load image...')
+        var name = req.query.cName
+        var sql = 'SELECT cName, cImage FROM company WHERE cName = ?'
+        return new Promise(function (resolve,reject)
+        {
+            conn.init().query(sql, name, function(err, rows)
+            {
+                if(err) res.send(err)
+                else
+                {
+                    var filePath = 'temp/' + name + 'Profile.png'
+                    fs.writeFileSync(filePath, rows[0].cImage)
+                    var imageAndPath = [rows[0].cImage, filePath]
+                    resolve(imageAndPath)
+                }
+            })
+        })
+    }
+    function sendImage(imageAndPath)
+    {
+        console.log('send image...')
+        return new Promise(function (resolve,reject)
+        {
+            res.writeHead(200, {"Content-Type": "image/png"});
+            res.write(imageAndPath[0]);
+            res.end();
+            resolve(imageAndPath[1])
+        })
+    }
+    function deleteTempImage(filePath)
+    {
+        console.log('deleting temp image...')
+        return new Promise(function (resolve,reject)
+        {
+            console.log(filePath+' deleting...')
+            fs.unlink(filePath, function(err)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    console.log('successfully load image and deleted temp image')
+                }
+            })
+        })
+    }
 })
 
 module.exports = router
