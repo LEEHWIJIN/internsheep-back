@@ -2,6 +2,19 @@ const Router = require('express')
 const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
+let multer = require('multer')
+var fs = require("fs")
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './temp/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+    },
+    filename: function (req, file, cb) {
+        console.log(req.body)
+        cb(null, file.originalname)
+    }
+})
+
+var upload = multer({storage: storage})
 
 
 
@@ -286,51 +299,65 @@ router.get('/watchNotice', function(req, res){
     })
 })
 
-router.post('/modifyNotice', function(req, res)
+function getFilesizeInBytes(filename) {
+    const stats = fs.statSync(filename);
+    const fileSizeInBytes = stats.size;
+    return fileSizeInBytes;
+}
+
+router.post('/modifyNotice', upload.single('file'), function(req, res)
 {
     Promise.resolve()
     .then(getCompanyNotice)
     .then(writeLocation)
     .then(writeCompanyNotice)
+        .then(uploadImage)
+        .then(deleteTempImage)
     .catch(function (err) {
         console.log('Error', err)
         process.exit()
     })
 
     function getCompanyNotice() {
-        var sql = 'SELECT* FROM company WHERE cLoginID = ?'
+        console.log('getCompanyNotice...')
+        var sql = 'SELECT * FROM company WHERE cLoginID = ?'
         var cLoginID = req.body.cLoginID
+        console.log(cLoginID+'...')
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
                 else
                 {
-                    resolve(rows[0].cID)
+                    console.log(rows.cID)
+                    resolve(rows[0].cID, rows[0].cLoginID)
                 }
             })
         })
     }    
-    function writeLocation (cID)
+    function writeLocation (cID, cLoginID)
     {
+        console.log('writeLocation...')
         var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
-        var location = req.body.data.cLocation
+        var location = req.body.cLocation
         var sqlParams = [location, cID]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
                 else
                 {
-                    resolve(cID)
+                    console.log(rows)
+                    resolve(cID,cLoginID)
                 }
             })
         })
     }
-    function writeCompanyNotice(cID) 
+    function writeCompanyNotice(cID, cLoginID) 
     {   
-        var start = new Date(req.body.data.internTermStart)
-        var end = new Date(req.body.data.internTermEnd)
-        var benefit = req.body.data.cBenefit
-        var pay = req.body.data.cPay
+        console.log('writeCompanyNotice...')
+        var start = new Date(req.body.internTermStart)
+        var end = new Date(req.body.internTermEnd)
+        var benefit = req.body.cBenefit
+        var pay = req.body.cPay
         var startYear = start.getFullYear()
         var startMonth = start.getMonth()
         var startDate = start.getDate()
@@ -339,9 +366,9 @@ router.post('/modifyNotice', function(req, res)
         var endDate = end.getDate() 
         var internTermEnd = new Date(endYear,endMonth, endDate, 32, 59,59)
         var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
-        var occupation = req.body.data.cOccupation
-        var numOfPeople = req.body.data.cNumOfPeople
-        var tag = req.body.data.cTag
+        var occupation = req.body.cOccupation
+        var numOfPeople = req.body.cNumOfPeople
+        var tag = req.body.cTag
 
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
         var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
@@ -350,8 +377,62 @@ router.post('/modifyNotice', function(req, res)
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                        res.send('1')
-                        resolve(0)
+                        console.log(rows)
+                        resolve(cLoginID)
+                }
+            })
+        })
+    }
+    function uploadImage(cLoginID)
+    {
+        console.log('uploading...')
+        var loginID = cLoginID
+        var sql = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+        var image = req.file
+        return new Promise(function (resolve,reject) {
+            fs.open(image.path, 'r', function(status, fd)
+            {
+                if (status)
+                {
+                    console.log(status.message)
+                    return
+                }
+                var buffer = new Buffer(getFilesizeInBytes(image.path))
+                var fileSize = getFilesizeInBytes(image.path);
+                fs.read(fd, buffer, 0, fileSize, 0, function(err,num)
+                {
+                    var sqlParams = [buffer, loginID]
+                    conn.init().query(sql, sqlParams, function(err, rows)
+                    {
+                        if(err)
+                        {
+                            console.log(err)
+                            res.send(err)
+                        }
+                        else
+                        {
+                            console.log(rows)
+                            resolve(image)
+                        }
+                    })
+                })
+
+            })
+        })
+    }
+    function deleteTempImage(image)
+    {
+        return new Promise(function (resolve,reject)
+        {
+            console.log(image.path+' deleting...')
+
+            fs.unlink(image.path, function(err)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    res.send('1')
+                    console.log('successfully upload image and deleted temp image')
                 }
             })
         })
@@ -805,10 +886,6 @@ router.get('/watchApplyStdNum', function(req, res) {
         })
     }
 })
-
-
-
-
 
 router.post('/changeYNApplyStd', function(req, res)
 {
@@ -1348,6 +1425,47 @@ router.get('/loadCstatus', function (req,res) {
             res.send(rows[0])
         }
     })
+})
+
+router.get('/getProfileImage', function(req,res)
+{
+    Promise.resolve()
+        .then(loadImage)
+        .then(sendImage)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+    function loadImage()
+    {
+        var cLoginID = req.query.cLoginID
+        var sql = 'SELECT cName, cImage FROM company WHERE cLoginID = ?'
+        return new Promise(function (resolve,reject)
+        {
+            conn.init().query(sql, cLoginID, function(err, rows)
+            {
+                if(err) res.send(err)
+                else
+                {
+                    console.log(rows[0].cImage)
+                    var filePath = 'temp/' + cLoginID + 'Profile.png'
+                    fs.writeFileSync(filePath, rows[0].cImage)
+                    // var imageAndPath = [image, ]
+                    resolve(rows[0].cImage)
+                }
+            })
+        })
+    }
+    function sendImage(image)
+    {
+        return new Promise(function (resolve,reject)
+        {
+            //resolve(filePath)
+            res.writeHead(200, {"Content-Type": "image/png"});
+            res.write(image);
+            res.end();
+        })
+    }
 })
 
 module.exports = router

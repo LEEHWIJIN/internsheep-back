@@ -541,7 +541,6 @@ router.get('/checkReportTerm', function (req,res) {
                         }
                     }
                 })
-
 })
 
 router.get('/watchReview', function (req,res) {
