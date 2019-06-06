@@ -1434,10 +1434,10 @@ router.get('/getProfileImage', function(req,res)
                 else
                 {
                     if(rows[0].cImage==null){
-                        resolve('0')    
+                        res.send('0')    
                     }
                     else{
-                    res.download(rows[0].cImage);
+                        res.download(rows[0].cImage);
                     }
                 }
             })
