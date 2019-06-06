@@ -653,11 +653,11 @@ router.get('/showStudentInfo', function(req, res)
 })
 router.post('/modifyStudentInfo', function(req, res)
 {
-    var sql = 'UPDATE student SET sNum = ?, sMajor = ? WHERE sLoginID = ?'
+    var sql = 'UPDATE student SET sNum = ?, sName = ? WHERE sLoginID = ?'
     var loginID = req.body.sLoginID
-    var sNum = req.body.sNum
-    var sMajor = req.body.sMajor
-    var sqlParams = [sNum, sMajor, loginID]
+    var sNum = req.body.data.sNum
+    var sName = req.body.data.sName
+    var sqlParams = [sNum, sName, loginID]
     conn.init().query(sql, sqlParams, function(err, rows)
     {
         if(err)res.send(err)
