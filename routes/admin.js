@@ -3,7 +3,6 @@ const router = Router()
 const mysql = require('../db/database_config.js')
 var conn = mysql()
 
-//test
 router.post('/postApplyTerm', function(req, res){
     var sql = 'INSERT INTO applyTerm (applyStart, applyEnd, applySemester, applyOrder) VALUES(?,?,?,?)'
     var start = req.body.applyStart.split('.')
