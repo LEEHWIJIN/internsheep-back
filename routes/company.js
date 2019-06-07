@@ -92,13 +92,13 @@ router.post('/addCoAndTag', function(req,res)
     {
         return new Promise(function (resolve,reject) {
             var sql = 'select tagID from tag where tag = ?'
-            var arr = new Array()
-            arr.push(req.body.tag)
-            console.log(req.body.tag)
-            for(var i =0 ;i<arr.length-1; i++){
+            //var arr = new Array()
+            //arr.push(req.body.tag)
+            //console.log(req.body.tag)
+            for(var i =0 ;i<req.body.tag.length-1; i++){
                 sql += 'union select tagID from tag where tag = ?'
             }
-            var params = arr
+            var params = req.body.tag
             conn.init().query(sql, params, function(err, rows)
             {
 
