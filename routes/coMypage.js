@@ -346,7 +346,7 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
             })
         })
     }    
-    function writeLocation (resolveParams)
+    function writeLocation (cID)
     {
         console.log(resolveParams+' are resolved')
         console.log('writeLocation...')
@@ -385,7 +385,7 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
         var tag = req.body.cTag
 
         var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
-        var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, resolveParams[cIdNum]]
+        var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
     
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
