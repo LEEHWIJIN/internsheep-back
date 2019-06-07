@@ -138,6 +138,65 @@ router.get('/std/dupcheck',function(req,res){
     })
 })
 
+router.post('/std/changepw',(req,res)=>{
+    Promise.resolve()
+        .then(getUser)
+        .then(checkPW)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+        function getUser(){
+            let id = req.body.sLoginID
+            var sql = 'select sPassword from student where sLoginID = ?'
+            var param = [id]
+            return new Promise(function (resolve, reject) {
+                conn.init().query(sql, param, function(err, rows){
+                    if(err) console.log(err)
+                    else {
+                        if(rows.length==0){//존재하지 않은 유저임
+                            return res.send({result:0})
+                        }
+                        else{
+                            console.log(rows[0].sPassword)
+                            resolve(rows[0].sPassword)
+                        }
+                    }
+                })
+            })
+        }
+        function checkPW(password){
+            var p = req.body.presentpw
+            var c = req.body.changepw
+            
+            return new Promise(function (resolve, reject) {
+            bcrypt.compare(p, password).then(result => {
+                if(result){
+                    bcrypt.hash(c, 12).then(hashed => {
+                        var id = req.body.sLoginID
+                        console.log(hashed)
+                        var sql = 'update student SET sPassword = ? where sLoginID = ?'
+                        var param = [hashed,id]
+                        conn.init().query(sql, param, function(err, rows){
+                            if(err) console.log(err)
+                            else {
+                                console.log(rows)
+                                res.send({result:2})
+                            }
+                        })
+                        
+                    });
+                }
+                else{
+                    return res.send({result:1});
+                }
+            })
+        })
+    }
+    
+})
+
 router.post('/std/signup',(req,res)=>{
     Promise.resolve()
         .then(signUp)

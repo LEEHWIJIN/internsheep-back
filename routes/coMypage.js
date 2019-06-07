@@ -1139,14 +1139,18 @@ router.get('/showCompanyInfo', function(req, res)
 
 router.post('/modifyCompanyInfo', function(req, res)
 {
+    console.log('modifying...')
     var loginID = req.body.cLoginID
-    var sql = 'UPDATE company SET cManagerName = ?, cManagerPhone = ?, cLocation = ?, cCeoPhone = ? WHERE cLoginID = ?'
+    var sql = 'UPDATE company SET cManagerName = ?, cManagerPhone = ?, cLocation = ?, cCeoPhone = ?, cName = ?, ceoName = ?, companyNum = ? WHERE cLoginID = ?'
      
     var managerName = req.body.data.cManagerName
     var managerPhone = req.body.data.cManagerPhone
-    var location = req.body.data.datacLocation
+    var location = req.body.data.data.cLocation
     var ceoPhone = req.body.data.cCeoPhone
-    var sqlParams = [managerName, managerPhone, location, ceoPhone, loginID]
+    var cName = req.body.data.cName
+    var ceoName = req.body.data.cCeoName
+    var companyNum = req.body.data.cCompanyNum
+    var sqlParams = [managerName, managerPhone, location, ceoPhone, cName, ceoName, companyNum, loginID]
     conn.init().query(sql, sqlParams, function(err,rows)
     {
         if(err)res.send(err)
