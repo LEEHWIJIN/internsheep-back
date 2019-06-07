@@ -315,7 +315,7 @@ router.get('/watchNotice', function(req, res){
     })
 })
 
-router.post('/modifyNotice', upload.single('image'), function(req, res)
+router.post('/modifyNotice', upload.single('file'), function(req, res)
 {
     Promise.resolve()
     .then(getCompanyNotice)
