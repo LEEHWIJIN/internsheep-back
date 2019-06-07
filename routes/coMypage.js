@@ -969,6 +969,7 @@ router.post('/changeYNApplyStd', function(req, res)
                 {
                     resolve(stdApplyCoIDs)
                     res.send('1')
+                    res.end()
                 }
             })
         })
