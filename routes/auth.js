@@ -274,7 +274,7 @@ router.post('/std/signup',(req,res)=>{
     function certification(certificationKey)
     {
         var userEmail = req.body.email
-        var url = 'http://localhost:8888/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
+        var url = 'http://std.ajou-internsheep.co/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
         var mailOption = {
             from: mailInfo.auth.user,
             to: userEmail,
