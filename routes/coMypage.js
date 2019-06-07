@@ -1116,6 +1116,7 @@ router.post('/changeYNApplyStd', function(req, res)
                 else {
                     resolve(rows)
                     res.send('1')
+                    res.end()
                 }
             })
         })
