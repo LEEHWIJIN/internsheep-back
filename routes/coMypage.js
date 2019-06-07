@@ -275,7 +275,7 @@ router.post('/writeNotice', upload.single('image'), function(req, res){
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
-                else {                                  
+                else {
                         resolve(0)
                 }
             })

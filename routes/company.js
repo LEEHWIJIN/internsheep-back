@@ -16,17 +16,32 @@ var storage = multer.diskStorage({
 
 var upload = multer({storage: storage})
 
-router.get('/getTag', function(req,res)
+router.get('/getAllTag', function(req,res)
 {
-    var sqlQuery = 'SELECT * FROM tag WHERE tag = ?'
-    var tag = req.query.tag
+    var sqlQuery = 'SELECT tag FROM tag'
      
-    conn.init().query(sqlQuery, tag, function(rows,err)
+    conn.init().query(sqlQuery
+        , function(rows,err)
     {
         if(err) res.send(err)
         else
         {
-            res.send(rows)
+            res.json(rows)
+        }
+    })
+})
+
+router.get('/getCoTag', function(req,res)
+{
+    var sqlQuery = 'SELECT tag FROM tag natural join coAndTag natural join company WHERE cLoginID = ?'
+    var cName = req.query.cLoginID
+
+    conn.init().query(sqlQuery, cName, function(rows,err)
+    {
+        if(err) res.send(err)
+        else
+        {
+            res.json(rows)
         }
     })
 })
@@ -38,20 +53,94 @@ router.post('/addTag', function(req,res)
   
     conn.init().query(sqlQuery, tag, function(err, rows)
     {
-        if(err)
-        {
-            console.log(err.code)
-            if(err.code =='ER_DUP_ENTRY')
-                res.send('1')
-            else
-                res.send(err)
-        }
+        if(err) console.log(err)
         else
         {
             console.log(rows)
             res.send('1')
         }
     })
+})
+
+router.post('/addCoAndTag', function(req,res)
+{
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .then(three)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+    function first()
+    {
+        return new Promise(function (resolve,reject) {
+            var sql = 'select cNoticeID from company natural join companyNotice where cLoginID = ?'
+            conn.init().query(sql, req.body.cLoginID, function(err, rows)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    console.log(rows[0])
+                    resolve(rows[0].cNoticeID)
+                }
+            })
+        })
+    }
+    function second(cNoticeID)
+    {
+        return new Promise(function (resolve,reject) {
+            var sql = 'select tagID from tag where tag = ?'
+            //var arr = new Array()
+            //arr.push(req.body.tag)
+            //console.log(req.body.tag)
+            for(var i =0 ;i<req.body.tag.length-1; i++){
+                sql += 'union select tagID from tag where tag = ?'
+            }
+            var params = req.body.tag
+            conn.init().query(sql, params, function(err, rows)
+            {
+
+                if(err) console.log(err)
+                else
+                {
+                    var data = {
+                        cNoticeID : cNoticeID,
+                        tagID : []
+                    }
+                    for(var i =0 ; i<rows.length; i++){
+                        data.tagID.push(rows[i].tagID)
+                    }
+                    console.log(data)
+                    resolve(data)
+                }
+            })
+        })
+    }
+    function three(data)
+    {
+        return new Promise(function (resolve,reject) {
+            console.log(data)
+            var sql3 = 'INSERT INTO coAndTag (tagID, cNoticeID) VALUES(?,?)'
+            var params3 = [data.tagID[0], data.cNoticeID]
+            for(var i =1 ;i<data.tagID.length; i++) {
+                sql3 += ', (?,?)'
+                params3.push(data.tagID[i], data.cNoticeID)
+            }
+            conn.init().query(sql3, params3, function(err, rows)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    console.log(rows)
+                    resolve()
+                    res.send(rows)
+                }
+            })
+
+        })
+    }
 })
 
 router.get('/getProfileImage', function(req,res)
