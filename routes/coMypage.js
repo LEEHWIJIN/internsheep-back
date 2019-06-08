@@ -321,7 +321,7 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
     .then(getCompanyNotice)
     .then(writeLocation)
     .then(writeCompanyNotice)
-    .then(unlinkImage)
+    // .then(unlinkImage)
     .then(uploadImage)
     .catch(function (err) {
         console.log('Error', err)
@@ -399,28 +399,28 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
             })
         })
     }
-    function unlinkImage() {
-        return new Promise(function (resolve,reject) {
-            var sql1 = 'SELECT cImage FROM company WHERE cLoginID = ?'
-            conn.init().query(sql1,req.body.cLoginID,function (err,rows) {
-                if(err) console.log(err)
-                else{
+    // function unlinkImage() {
+    //     return new Promise(function (resolve,reject) {
+    //         var sql1 = 'SELECT cImage FROM company WHERE cLoginID = ?'
+    //         conn.init().query(sql1,req.body.cLoginID,function (err,rows) {
+    //             if(err) console.log(err)
+    //             else{
 
-                    fs.unlink(rows[0].cImage, function (err) {
-                        if(err) {
-                            console.log('제대로 안됨')
-                            resolve('err')
-                        }
-                        else {
-                            console.log('제대로 됨')
-                            resolve('0')
-                        }
-                    })
+    //                 fs.unlink(rows[0].cImage, function (err) {
+    //                     if(err) {
+    //                         console.log('제대로 안됨')
+    //                         resolve('err')
+    //                     }
+    //                     else {
+    //                         console.log('제대로 됨')
+    //                         resolve('0')
+    //                     }
+    //                 })
                 
-                }
-            })
-        })
-    }
+    //             }
+    //         })
+    //     })
+    // }
     function uploadImage()
     {
         console.log('uploading...')
@@ -1447,10 +1447,7 @@ router.get('/getProfileImage', function(req,res)
                 if(err) res.send(err)
                 else
                 {
-                    if(rows[0].cImage==null){
-                        res.send('0')    
-                    }
-                    else{
+                    if(rows[0].cImage){
                         var filename = __dirname+'/../'+rows[0].cImage
                         fs.readFile(filename,              //파일 읽기
                             function (err, data)
@@ -1458,14 +1455,21 @@ router.get('/getProfileImage', function(req,res)
                                 //http의 헤더정보를 클라이언트쪽으로 출력
                                 //image/jpg : jpg 이미지 파일을 전송한다
                                 //write 로 보낼 내용을 입력
-                                res.writeHead(200, { "Context-Type": "image/jpg" })//보낼 헤더를 만듬
-                                res.write(data)   //본문을 만들고
-                                res.end()  //클라이언트에게 응답을 전송한다
-                    
+                                if(data)
+                                {   
+                                    res.writeHead(200, { "Context-Type": "image/jpg" })//보낼 헤더를 만듬
+                                    res.write(data)   //본문을 만들고
+                                    res.end()  //클라이언트에게 응답을 전송한다
+                                }
+                                else res.send('0')
                             }
                         )
                         console.log(__dirname+'/../'+rows[0].cImage)
                         // res.download(__dirname+'/../'+rows[0].cImage)
+                          
+                    }
+                    else{
+                        res.send('0')  
                     }
                 }
             })
