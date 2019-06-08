@@ -501,7 +501,7 @@ router.get('/downloadReport', function (req,res) {
                 // console.log(rows[0].reportURL)
                 // res.download(rows[0].reportURL)
 
-                res.download('/home/deploy/was/'+rows[0].reportURL)
+                res.download(rows[0].reportURL)
 
             }
         }

@@ -1461,7 +1461,7 @@ router.get('/getProfileImage', function(req,res)
             resolve(0)
         }
         else{
-            res.download('/home/deploy/was/'+rows[0].cImage);
+            res.download(rows[0].cImage);
         }
         }
     })
