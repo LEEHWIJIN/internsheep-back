@@ -1446,7 +1446,7 @@ router.get('/loadCstatus', function (req,res) {
 
 router.get('/getProfileImage', function(req,res)
 {
-    var cLoginID = req.query.cLoginID
+    var cLoginID = req.query.cLoginID 
     var sql = 'SELECT cImage FROM company WHERE cLoginID = ?'
     conn.init().query(sql, cLoginID, function(err, rows)
     {
