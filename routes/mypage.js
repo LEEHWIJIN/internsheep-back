@@ -498,7 +498,7 @@ router.get('/downloadReport', function (req,res) {
                 res.send('0')
             }
             else {
-                res.download(rows[0].reportURL)
+                res.download('/home/deploy/was/'+rows[0].reportURL)
             }
         }
     })
