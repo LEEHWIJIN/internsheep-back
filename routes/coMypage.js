@@ -1447,40 +1447,6 @@ router.get('/loadCstatus', function (req,res) {
 router.get('/getProfileImage', function(req,res)
 {
     var cLoginID = req.query.cLoginID
-<<<<<<< HEAD
-        var sql = 'SELECT cImage FROM company WHERE cLoginID = ?'
-            conn.init().query(sql, cLoginID, function(err, rows)
-            {
-                if(err) res.send(err)
-                else
-                {
-                    if(rows[0].cImage){
-                        var filename = __dirname+'/../'+rows[0].cImage
-                        fs.readFile(filename,              //파일 읽기
-                            function (err, data)
-                            {
-                                //http의 헤더정보를 클라이언트쪽으로 출력
-                                //image/jpg : jpg 이미지 파일을 전송한다
-                                //write 로 보낼 내용을 입력
-                                if(data)
-                                {   
-                                    res.writeHead(200, { "Context-Type": "image/jpg" })//보낼 헤더를 만듬
-                                    res.write(data)   //본문을 만들고
-                                    res.end()  //클라이언트에게 응답을 전송한다
-                                }
-                                else res.send('0')
-                            }
-                        )
-                        console.log(__dirname+'/../'+rows[0].cImage)
-                        // res.download(__dirname+'/../'+rows[0].cImage)
-                          
-                    }
-                    else{
-                        res.send('0')  
-                    }
-                }
-            })
-=======
     var sql = 'SELECT cImage FROM company WHERE cLoginID = ?'
     conn.init().query(sql, cLoginID, function(err, rows)
     {
@@ -1494,7 +1460,6 @@ router.get('/getProfileImage', function(req,res)
         }
         }
     })
->>>>>>> 0759b1732c50db4b37a712ff4026a91e15e3776e
 })
 
 module.exports = router
