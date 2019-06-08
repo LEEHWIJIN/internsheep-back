@@ -718,6 +718,7 @@ router.get('/checkPickCo',function(req,res){
         var sql = 'select * from student natural join company natural join companyNotice natural join applyNotice natural join stdPickCo natural join applyTerm where sLoginID = ? and cName = ? and applySemester =? and applyOrder=?'
         var params = [req.query.sLoginID, req.query.cName, req.query.applySemester, req.query.applyOrder]
         //console.log('query : '+ req.query.cName)
+    console.log('sdfsf'+req.query)
         conn.init().query(sql, params, function (err, rows) {
 
             if (err) console.log(err)
@@ -745,8 +746,8 @@ router.post('/postStdPickCo', function (req, res) {
         })
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql1 = 'select sID, applyNoticeID, sLoginID, cName from student join company join companyNotice join applyNotice where student.sLoginID = ? and company.cName = ? and companyNotice.cID = company.cID and companyNotice.cNoticeID = applyNotice.cNoticeID'
-            var params1 = [req.body.sLoginID, req.body.cName]
+            var sql1 = 'select sID, applyNoticeID, sLoginID, cName from student join company join companyNotice join applyNotice join applyTerm where student.sLoginID = ? and company.cName = ? and companyNotice.cID = company.cID and companyNotice.cNoticeID = applyNotice.cNoticeID and applyNotice.applyTermID = applyTerm.applyTermID and applyOrder = ?'
+            var params1 = [req.body.sLoginID, req.body.cName, req.body.applyOrder]
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else{
