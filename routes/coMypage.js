@@ -14,7 +14,7 @@ var storage = multer.diskStorage({
     }
 })
 
-var upload = multer({storage: storage})
+var upload = multer({storage: storage, limits : {fileSize : 5*1024*1024}})
 
 
 
@@ -239,9 +239,11 @@ router.post('/writeNotice', upload.single('image'), function(req, res){
     }    
     function writeLocation (cID)
     {
-        var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
+        var sql = 'UPDATE company SET cLocation = ? , cManagerName =?, cManagerPhone=? WHERE cID = ?'
         var location = req.body.cLocation
-        var sqlParams = [location, cID]
+        var cManagerName = req.body.cManagerName
+        var cManagerPhone = req.body.cManagerPhone
+        var sqlParams = [location,cManagerName, cManagerPhone, cID]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
@@ -270,8 +272,9 @@ router.post('/writeNotice', upload.single('image'), function(req, res){
         var numOfPeople = req.body.cNumOfPeople
         var tag = req.body.cTag
         var info = req.body.cInfo
-        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag, cInfo) VALUES(?,?,?,?,?,?,?,?,?)'
-        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, info]
+        var cEmail = req.body.cEmail
+        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag, cInfo, cEmail) VALUES(?,?,?,?,?,?,?,?,?,?)'
+        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, info, cEmail]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
@@ -315,7 +318,7 @@ router.get('/watchNotice', function(req, res){
     })
 })
 
-router.post('/modifyNotice', upload.single('file'), function(req, res)
+router.post('/modifyNotice', upload.single('image'), function(req, res)
 {
     Promise.resolve()
     .then(getCompanyNotice)
@@ -351,9 +354,11 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
     {
         //console.log(resolveParams+' are resolved')
         console.log('writeLocation...')
-        var sql = 'UPDATE company SET cLocation = ? WHERE cID = ?'
+        var sql = 'UPDATE company SET cLocation = ?, cManagerName=?, cManagerPhone =?WHERE cID = ?'
         var location = req.body.cLocation
-        var sqlParams = [location, cID]
+        var cManagerName = req.body.cManagerName
+        var cManagerPhone = req.body.cManagerPhone
+        var sqlParams = [location, cManagerName,cManagerPhone, cID]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, sqlParams, function (err, rows) {
                 if (err) reject(err)
@@ -384,9 +389,11 @@ router.post('/modifyNotice', upload.single('file'), function(req, res)
         var occupation = req.body.cOccupation
         var numOfPeople = req.body.cNumOfPeople
         var tag = req.body.cTag
+        var cInfo = req.body.cInfo
+        var cEmail = req.body.cEmail
 
-        var sql = 'UPDATE companyNotice SET cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
-        var params = [benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
+        var sql = 'UPDATE companyNotice SET cInfo =?, cEmail =?, cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
+        var params = [cInfo, cEmail, benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
         
         
         return new Promise(function (resolve, reject) {
@@ -1439,36 +1446,20 @@ router.get('/loadCstatus', function (req,res) {
 
 router.get('/getProfileImage', function(req,res)
 {
-    console.log('getProfileImage')
     var cLoginID = req.query.cLoginID
-        var sql = 'SELECT cImage FROM company WHERE cLoginID = ?'
-            conn.init().query(sql, cLoginID, function(err, rows)
-            {
-                if(err) res.send(err)
-                else
-                {
-                    if(rows[0].cImage==null){
-                        res.send('0')    
-                    }
-                    else{
-                        var filename = __dirname+'/../'+rows[0].cImage
-                        fs.readFile(filename,              //파일 읽기
-                            function (err, data)
-                            {
-                                //http의 헤더정보를 클라이언트쪽으로 출력
-                                //image/jpg : jpg 이미지 파일을 전송한다
-                                //write 로 보낼 내용을 입력
-                                res.writeHead(200, { "Context-Type": "image/jpg" })//보낼 헤더를 만듬
-                                res.write(data)   //본문을 만들고
-                                res.end()  //클라이언트에게 응답을 전송한다
-                    
-                            }
-                        )
-                        console.log(__dirname+'/../'+rows[0].cImage)
-                        // res.download(__dirname+'/../'+rows[0].cImage)
-                    }
-                }
-            })
+    var sql = 'SELECT cImage FROM company WHERE cLoginID = ?'
+    conn.init().query(sql, cLoginID, function(err, rows)
+    {
+        if(err) res.send(err)
+        else
+        {if(rows[0].cImage==null){
+            resolve(0)
+        }
+        else{
+            res.download(rows[0].cImage);
+        }
+        }
+    })
 })
 
 module.exports = router
