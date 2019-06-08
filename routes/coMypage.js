@@ -324,7 +324,7 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
     .then(getCompanyNotice)
     .then(writeLocation)
     .then(writeCompanyNotice)
-    .then(unlinkImage)
+    // .then(unlinkImage)
     .then(uploadImage)
     .catch(function (err) {
         console.log('Error', err)
@@ -406,28 +406,28 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
             })
         })
     }
-    function unlinkImage() {
-        return new Promise(function (resolve,reject) {
-            var sql1 = 'SELECT cImage FROM company WHERE cLoginID = ?'
-            conn.init().query(sql1,req.body.cLoginID,function (err,rows) {
-                if(err) console.log(err)
-                else{
+    // function unlinkImage() {
+    //     return new Promise(function (resolve,reject) {
+    //         var sql1 = 'SELECT cImage FROM company WHERE cLoginID = ?'
+    //         conn.init().query(sql1,req.body.cLoginID,function (err,rows) {
+    //             if(err) console.log(err)
+    //             else{
 
-                    fs.unlink(rows[0].cImage, function (err) {
-                        if(err) {
-                            console.log('제대로 안됨')
-                            resolve('err')
-                        }
-                        else {
-                            console.log('제대로 됨')
-                            resolve('0')
-                        }
-                    })
+    //                 fs.unlink(rows[0].cImage, function (err) {
+    //                     if(err) {
+    //                         console.log('제대로 안됨')
+    //                         resolve('err')
+    //                     }
+    //                     else {
+    //                         console.log('제대로 됨')
+    //                         resolve('0')
+    //                     }
+    //                 })
                 
-                }
-            })
-        })
-    }
+    //             }
+    //         })
+    //     })
+    // }
     function uploadImage()
     {
         console.log('uploading...')
@@ -1446,7 +1446,7 @@ router.get('/loadCstatus', function (req,res) {
 
 router.get('/getProfileImage', function(req,res)
 {
-    var cLoginID = req.query.cLoginID
+    var cLoginID = req.query.cLoginID 
     var sql = 'SELECT cImage FROM company WHERE cLoginID = ?'
     conn.init().query(sql, cLoginID, function(err, rows)
     {

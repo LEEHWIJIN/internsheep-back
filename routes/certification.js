@@ -29,12 +29,12 @@ router.get("/confirm", function(req,res)
                 if (err) reject(err)
                 else {
                     console.log(rows)
-                    resolve(rows[0].cLoginID)
+                    resolve(rows[0].sLoginID)
                 }
             })
         })
     }
-    function confirm2(cLoginID)
+    function confirm2(sLoginID)
     {
         var sql = 'UPDATE student SET certification = 1 WHERE sLoginID = ?'
         var ID = req.query.sLoginID
@@ -44,13 +44,18 @@ router.get("/confirm", function(req,res)
                 if (err) reject(err)
                 else {
                     console.log(rows)
-                    res.send('인증완료')
+                    res.redirect('/certification/certifyingComplete')
                 }
             })
         })
     }
-
-
+})
+router.get('/certifyingComplete',function(req,res)
+{   
+    var url = "'http://std.ajou-internsheep.co/login'"
+    var sendMassage = '<script type="text/javascript">alert("인증이 완료 되었습니다.")</script>'+'<script>'+'location.replace('+ url +');'+'</script>'
+    console.log(sendMassage)
+    res.send(sendMassage)
 })
 
 module.exports = router
