@@ -498,6 +498,7 @@ router.get('/downloadReport', function (req,res) {
                 res.send('0')
             }
             else {
+                console.log(rows[0].reportURL)
                 res.download(rows[0].reportURL)
             }
         }
