@@ -14,7 +14,7 @@ var storage = multer.diskStorage({
     }
 })
 
-var upload = multer({storage: storage})
+var upload = multer({storage: storage, limits: { fieldSize: 5 * 1024 * 1024 }})
 
 router.post('/resume', function (req, res) {
 
@@ -136,112 +136,148 @@ router.get('/watchResume', function (req, res) {
     })
 })
 
-router.post('/modifyResume', function (req, res) {
-    var sql = 'SELECT sID FROM student WHERE sLoginID = ?'
-    var sLoginID = req.body.req.sLoginID
+router.post('/modifyResume',upload.single('image'),function (req, res) {
 
-    conn.init().query(sql, sLoginID, function (err, rows) {
-        if (err) console.log(err)
-        else {
-            var sID =  rows[0].sID
-            var programmingLang = `{ `
-            programmingLang += `"Javascript" : `+ `"` +req.body.req.programmingLang.Javascript+ `"`+ `,`
-            programmingLang += `"HTML" : ` + `"` + req.body.req.programmingLang.HTML + `"` + `,`
-            programmingLang += `"CSS" : `+ `"` +req.body.req.programmingLang.CSS + `"` + `,`
-            programmingLang += `"jQuery" : `+ `"` + req.body.req.programmingLang.jQuery + `"` + `,`
-            programmingLang += `"SQL": ` + `"` +req.body.req.programmingLang.SQL + `"` + `,`
-            programmingLang += `"Java": ` + `"` +req.body.req.programmingLang.Java + `"` + `,`
-            programmingLang += `"AndroidJava": `+ `"` +req.body.req.programmingLang.AndroidJava + `"` + `,`
-            programmingLang += `"Swift": ` + `"` +req.body.req.programmingLang.Swift + `"` + `,`
-            programmingLang += `"Objective": ` + `"` +req.body.req.programmingLang.Objective + `"` + `,`
-            programmingLang += `"Python": `+ `"` + req.body.req.programmingLang.Python+ `"` + `,`
-            programmingLang +=  `"PHP": `+ `"` +req.body.req.programmingLang.PHP + `"` +`,`
-            programmingLang +=  `"C": `+ `"` +req.body.req.programmingLang.C + `"` +`,`
-            programmingLang += `"Microsoft": `+ `"` +req.body.req.programmingLang.Microsoft+ `"` +`,`
-            programmingLang += `"Kotlin": `+ `"` +req.body.req.programmingLang.Kotlin + `"` +`,`
-            programmingLang += `"Peral": `+ `"` +req.body.req.programmingLang.Peral + `"` +`,`
-            programmingLang += `"R": `+  `"` +req.body.req.programmingLang.R + `"` +`,`
-            programmingLang += `"VBA": `+ `"` +req.body.req.programmingLang.VBA + `"` + `}`
+    Promise.resolve()
+        .then(first)
+        .then(second)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
 
-            var frameworkLang = `{`
-                frameworkLang += `"Nodejs" : `+ `"` +req.body.req.frameworkLang.Nodejs + `"` +`,`
-                frameworkLang += `"Angular" : `+ `"` +req.body.req.frameworkLang.Angular+ `"` +`,`
-                frameworkLang += `"React" : `+ `"` + req.body.req.frameworkLang.React+ `"` +`,`
-                frameworkLang += `"Expressjs" : `+ `"` +req.body.req.frameworkLang.Expressjs+ `"` +`,`
-                frameworkLang += `"NetCore" : `+ `"` +req.body.req.frameworkLang.NetCore+ `"` +`,`
-                frameworkLang += `"Spring" : `+ `"` +req.body.req.frameworkLang.Spring+ `"` +`,`
-                frameworkLang += `"Django" : `+ `"` + req.body.req.frameworkLang.Django+ `"` +`,`
-                frameworkLang += `"Flask" :`+ `"` +req.body.req.frameworkLang.Flask+ `"` +`,`
-                frameworkLang += `"Cordova" : `+ `"` + req.body.req.frameworkLang.Cordova + `"` +`}`
+    function first() {
+        return new Promise(function (resolve,reject) {
+            var sql1 = 'SELECT sImage FROM student natural join resume WHERE sLoginID = ?'
+            conn.init().query(sql1,req.body.req.sLoginID,function (err,rows) {
+                if(err) console.log(err)
+                else{
 
+                    // fs.unlink(rows[0].sImage, function (err) {
+                    //     if(err) {
+                    //         console.log('제대로 안됨')
+                    //         resolve('err')
+                    //     }
+                    //     else {
+                    //         console.log('제대로 됨')
+                    //         resolve('0')
+                    //     }
+                    // })
+                    resolve('0')
 
-            var databaseLang = `{`
-                databaseLang += `"MySql" : ` + `"` +req.body.req.databaseLang.MySql + `"` + `,`
-                databaseLang += `"SQLServer" : `+ `"` +req.body.req.databaseLang.SQLServer + `"` + `,`
-                databaseLang += `"MongoDB" : `+ `"` +req.body.req.databaseLang.MongoDB + `"` + `,`
-                databaseLang += `"SQLite" : `+ `"` +req.body.req.databaseLang.SQLite + `"` + `,`
-                databaseLang += `"Redis" : `+ `"` +req.body.req.databaseLang.Redis + `"` + `,`
-                databaseLang += `"Oracle" : `+ `"` +req.body.req.databaseLang.Oracle + `"` + `,`
-                databaseLang += `"Flask" : `+ `"` +req.body.req.databaseLang.Flask + `"` + `,`
-                databaseLang += `"Cordova" : `+ `"` +req.body.req.databaseLang.Cordova + `"` +`}`
-
-            var cloudLang = `{`
-                cloudLang += `"AWS" : `+ `"` +req.body.req.cloudLang.AWS+ `"` + `,`
-                cloudLang += `"Azure" : `+ `"` +req.body.req.cloudLang.Azure+ `"` + `,`
-                cloudLang += `"GCP" : `+ `"` +req.body.req.cloudLang.GCP+ `"` + `,`
-                cloudLang += `"Linux" : `+ `"` +req.body.req.cloudLang.Linux+ `"` + `,`
-                cloudLang += `"Wordpress" : `+ `"` +req.body.req.cloudLang.Wordpress+ `"` + `,`
-                cloudLang += `"RaspberryPi" : `+ `"` +req.body.req.cloudLang.RaspberryPi+ `"` + `,`
-                cloudLang += `"Arduino" : `+ `"` +req.body.req.cloudLang.Arduino+ `"` + `,`
-                cloudLang += `"Firebase" : `+ `"` +req.body.req.cloudLang.Firebase+ `"` + `,`
-                cloudLang += `"Docker" : `+ `"` +req.body.req.cloudLang.Docker+ `"` + `,`
-                cloudLang += `"Go" : `+ `"` +req.body.req.cloudLang.Go+ `"` +`}`
-
-            var machineLang = `{`
-                machineLang += `"Tensorflow" : `+ `"` +req.body.req.machineLang.Tensorflow+ `"` + `,`
-                machineLang += `"Caffe" : `+ `"` +req.body.req.machineLang.Caffe+ `"` + `,`
-                machineLang += `"OpenCV" : `+ `"` +req.body.req.machineLang.OpenCV+ `"` + `,`
-                machineLang += `"DLib" : `+ `"` +req.body.req.machineLang.DLib+ `"` + `,`
-                machineLang += `"OpenGL" : `+ `"` +req.body.req.machineLang.OpenGL+ `"` + `,`
-                machineLang += `"Unity" : `+ `"` +req.body.req.machineLang.Unity+ `"` +`,`
-                machineLang += `"Arduino" : `+ `"` +req.body.req.machineLang.Arduino+ `"` + `,`
-                machineLang += `"Firebase" : `+ `"` +req.body.req.machineLang.Firebase+ `"` +`}`
-            console.log(req.body.req.getUserGrade)
-            var sScore = `{`
-                sScore += `"computerprogramming" : `+ `"` +req.body.req.getUserGrade[0].computerprogramming+ `"` + `,`
-                sScore += `"discretemath" : `+ `"` +req.body.req.getUserGrade[0].discretemath+ `"` + `,`
-                sScore += `"datastructure" : `+ `"` +req.body.req.getUserGrade[0].datastructure+ `"` + `,`
-                sScore += `"objectiveprogramming" : `+ `"` +req.body.req.getUserGrade[0].objectiveprogramming+ `"` + `,`
-                sScore += `"computerstructure" : `+ `"` +req.body.req.getUserGrade[0].computerstructure+ `"` + `,`
-                sScore += `"algorithm" : `+ `"` +req.body.req.getUserGrade[0].algorithm+ `"` + `,`
-                sScore += `"systemprogramming" : `+ `"` +req.body.req.getUserGrade[0].systemprogramming+ `"` + `,`
-                sScore += `"os" : `+ `"` +req.body.req.getUserGrade[0].os+ `"` + `,`
-                sScore +=  `"database" : `+ `"` +req.body.req.getUserGrade[0].database+ `"` + `,`
-                sScore += `"network" : `+ `"` +req.body.req.getUserGrade[0].network+ `"` +`}`
-
-            var sEnglish = `{`
-            sEnglish += `"EnglishSearch" : ` +  `"` +req.body.req.getUserEng[0].EnglishSearch + `"` + `,`
-            sEnglish += `"EnglishCommunication" : ` +  `"` +req.body.req.getUserEng[0].EnglishCommunication + `"` + `,`
-            sEnglish += `"EnglishPresentation" : ` +  `"` +req.body.req.getUserEng[0].EnglishPresentation + `"` + `,`
-            sEnglish += `"EnglishReport" : ` +  `"` +req.body.req.getUserEng[0].EnglishReport + `"` +`}`
-
-            var sPhone = req.body.req.getUserInfo[0].sPhone
-            var sHope = req.body.req.getUserInfo[0].sHope
-            var sEmail = req.body.req.getUserInfo[0].sEmail
-            var sGrade = req.body.req.getUserInfo[0].sGrade
-            var sHopeTerm = req.body.req.getUserInfo[0].sHopeTerm
-
-            var sql2 = 'UPDATE resume SET programmingLang = ?, frameworkLang=?, databaseLang=?, cloudLang=?, machineLang=?, sScore=?, sPhone=?, sHope=?, sEmail=?, sGrade=?, sHopeTerm=?,sEnglish=? WHERE sID = ?'
-            var params = [programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish, sID]
-
-            conn.init().query(sql2, params, function (err, rows) {
-                if (err) console.log(err)
-                else {
-                    res.send(rows)
                 }
             })
-        }
-    })
+        })
+    }
+    function second() {
+        return new Promise(function (resolve,reject) {
+            var sql = 'SELECT sID FROM student WHERE sLoginID = ?'
+            var sLoginID = req.body.req.sLoginID
+
+            conn.init().query(sql, sLoginID, function (err, rows) {
+                if (err) console.log(err)
+                else {
+                    var sID = rows[0].sID
+                    var programmingLang = `{ `
+                    programmingLang += `"Javascript" : ` + `"` + req.body.req.programmingLang.Javascript + `"` + `,`
+                    programmingLang += `"HTML" : ` + `"` + req.body.req.programmingLang.HTML + `"` + `,`
+                    programmingLang += `"CSS" : ` + `"` + req.body.req.programmingLang.CSS + `"` + `,`
+                    programmingLang += `"jQuery" : ` + `"` + req.body.req.programmingLang.jQuery + `"` + `,`
+                    programmingLang += `"SQL": ` + `"` + req.body.req.programmingLang.SQL + `"` + `,`
+                    programmingLang += `"Java": ` + `"` + req.body.req.programmingLang.Java + `"` + `,`
+                    programmingLang += `"AndroidJava": ` + `"` + req.body.req.programmingLang.AndroidJava + `"` + `,`
+                    programmingLang += `"Swift": ` + `"` + req.body.req.programmingLang.Swift + `"` + `,`
+                    programmingLang += `"Objective": ` + `"` + req.body.req.programmingLang.Objective + `"` + `,`
+                    programmingLang += `"Python": ` + `"` + req.body.req.programmingLang.Python + `"` + `,`
+                    programmingLang += `"PHP": ` + `"` + req.body.req.programmingLang.PHP + `"` + `,`
+                    programmingLang += `"C": ` + `"` + req.body.req.programmingLang.C + `"` + `,`
+                    programmingLang += `"Microsoft": ` + `"` + req.body.req.programmingLang.Microsoft + `"` + `,`
+                    programmingLang += `"Kotlin": ` + `"` + req.body.req.programmingLang.Kotlin + `"` + `,`
+                    programmingLang += `"Peral": ` + `"` + req.body.req.programmingLang.Peral + `"` + `,`
+                    programmingLang += `"R": ` + `"` + req.body.req.programmingLang.R + `"` + `,`
+                    programmingLang += `"VBA": ` + `"` + req.body.req.programmingLang.VBA + `"` + `}`
+
+                    var frameworkLang = `{`
+                    frameworkLang += `"Nodejs" : ` + `"` + req.body.req.frameworkLang.Nodejs + `"` + `,`
+                    frameworkLang += `"Angular" : ` + `"` + req.body.req.frameworkLang.Angular + `"` + `,`
+                    frameworkLang += `"React" : ` + `"` + req.body.req.frameworkLang.React + `"` + `,`
+                    frameworkLang += `"Expressjs" : ` + `"` + req.body.req.frameworkLang.Expressjs + `"` + `,`
+                    frameworkLang += `"NetCore" : ` + `"` + req.body.req.frameworkLang.NetCore + `"` + `,`
+                    frameworkLang += `"Spring" : ` + `"` + req.body.req.frameworkLang.Spring + `"` + `,`
+                    frameworkLang += `"Django" : ` + `"` + req.body.req.frameworkLang.Django + `"` + `,`
+                    frameworkLang += `"Flask" :` + `"` + req.body.req.frameworkLang.Flask + `"` + `,`
+                    frameworkLang += `"Cordova" : ` + `"` + req.body.req.frameworkLang.Cordova + `"` + `}`
+
+
+                    var databaseLang = `{`
+                    databaseLang += `"MySql" : ` + `"` + req.body.req.databaseLang.MySql + `"` + `,`
+                    databaseLang += `"SQLServer" : ` + `"` + req.body.req.databaseLang.SQLServer + `"` + `,`
+                    databaseLang += `"MongoDB" : ` + `"` + req.body.req.databaseLang.MongoDB + `"` + `,`
+                    databaseLang += `"SQLite" : ` + `"` + req.body.req.databaseLang.SQLite + `"` + `,`
+                    databaseLang += `"Redis" : ` + `"` + req.body.req.databaseLang.Redis + `"` + `,`
+                    databaseLang += `"Oracle" : ` + `"` + req.body.req.databaseLang.Oracle + `"` + `,`
+                    databaseLang += `"Flask" : ` + `"` + req.body.req.databaseLang.Flask + `"` + `,`
+                    databaseLang += `"Cordova" : ` + `"` + req.body.req.databaseLang.Cordova + `"` + `}`
+
+                    var cloudLang = `{`
+                    cloudLang += `"AWS" : ` + `"` + req.body.req.cloudLang.AWS + `"` + `,`
+                    cloudLang += `"Azure" : ` + `"` + req.body.req.cloudLang.Azure + `"` + `,`
+                    cloudLang += `"GCP" : ` + `"` + req.body.req.cloudLang.GCP + `"` + `,`
+                    cloudLang += `"Linux" : ` + `"` + req.body.req.cloudLang.Linux + `"` + `,`
+                    cloudLang += `"Wordpress" : ` + `"` + req.body.req.cloudLang.Wordpress + `"` + `,`
+                    cloudLang += `"RaspberryPi" : ` + `"` + req.body.req.cloudLang.RaspberryPi + `"` + `,`
+                    cloudLang += `"Arduino" : ` + `"` + req.body.req.cloudLang.Arduino + `"` + `,`
+                    cloudLang += `"Firebase" : ` + `"` + req.body.req.cloudLang.Firebase + `"` + `,`
+                    cloudLang += `"Docker" : ` + `"` + req.body.req.cloudLang.Docker + `"` + `,`
+                    cloudLang += `"Go" : ` + `"` + req.body.req.cloudLang.Go + `"` + `}`
+
+                    var machineLang = `{`
+                    machineLang += `"Tensorflow" : ` + `"` + req.body.req.machineLang.Tensorflow + `"` + `,`
+                    machineLang += `"Caffe" : ` + `"` + req.body.req.machineLang.Caffe + `"` + `,`
+                    machineLang += `"OpenCV" : ` + `"` + req.body.req.machineLang.OpenCV + `"` + `,`
+                    machineLang += `"DLib" : ` + `"` + req.body.req.machineLang.DLib + `"` + `,`
+                    machineLang += `"OpenGL" : ` + `"` + req.body.req.machineLang.OpenGL + `"` + `,`
+                    machineLang += `"Unity" : ` + `"` + req.body.req.machineLang.Unity + `"` + `,`
+                    machineLang += `"Arduino" : ` + `"` + req.body.req.machineLang.Arduino + `"` + `,`
+                    machineLang += `"Firebase" : ` + `"` + req.body.req.machineLang.Firebase + `"` + `}`
+                    console.log(req.body.req.getUserGrade)
+                    var sScore = `{`
+                    sScore += `"computerprogramming" : ` + `"` + req.body.req.getUserGrade[0].computerprogramming + `"` + `,`
+                    sScore += `"discretemath" : ` + `"` + req.body.req.getUserGrade[0].discretemath + `"` + `,`
+                    sScore += `"datastructure" : ` + `"` + req.body.req.getUserGrade[0].datastructure + `"` + `,`
+                    sScore += `"objectiveprogramming" : ` + `"` + req.body.req.getUserGrade[0].objectiveprogramming + `"` + `,`
+                    sScore += `"computerstructure" : ` + `"` + req.body.req.getUserGrade[0].computerstructure + `"` + `,`
+                    sScore += `"algorithm" : ` + `"` + req.body.req.getUserGrade[0].algorithm + `"` + `,`
+                    sScore += `"systemprogramming" : ` + `"` + req.body.req.getUserGrade[0].systemprogramming + `"` + `,`
+                    sScore += `"os" : ` + `"` + req.body.req.getUserGrade[0].os + `"` + `,`
+                    sScore += `"database" : ` + `"` + req.body.req.getUserGrade[0].database + `"` + `,`
+                    sScore += `"network" : ` + `"` + req.body.req.getUserGrade[0].network + `"` + `}`
+
+                    var sEnglish = `{`
+                    sEnglish += `"EnglishSearch" : ` + `"` + req.body.req.getUserEng[0].EnglishSearch + `"` + `,`
+                    sEnglish += `"EnglishCommunication" : ` + `"` + req.body.req.getUserEng[0].EnglishCommunication + `"` + `,`
+                    sEnglish += `"EnglishPresentation" : ` + `"` + req.body.req.getUserEng[0].EnglishPresentation + `"` + `,`
+                    sEnglish += `"EnglishReport" : ` + `"` + req.body.req.getUserEng[0].EnglishReport + `"` + `}`
+                    console.log(req.body.req.getUserInfo[0])
+                    var sPhone = req.body.req.getUserInfo[0].sPhone
+                    var sHope = req.body.req.getUserInfo[0].sHope
+                    var sEmail = req.body.req.getUserInfo[0].sEmail
+                    var sGrade = req.body.req.getUserInfo[0].sGrade
+                    var sHopeTerm = req.body.req.getUserInfo[0].sHopeTerm
+                    var sImage = req.body.req.getUserInfo[0].file.path
+                    var sql2 = 'UPDATE resume SET programmingLang = ?, frameworkLang=?, databaseLang=?, cloudLang=?, machineLang=?, sScore=?, sPhone=?, sHope=?, sEmail=?, sGrade=?, sHopeTerm=?,sEnglish=?, sImage=? WHERE sID = ?'
+                    var params = [programmingLang, frameworkLang, databaseLang, cloudLang, machineLang, sScore, sPhone, sHope, sEmail, sGrade, sHopeTerm, sEnglish, sImage, sID]
+
+                    conn.init().query(sql2, params, function (err, rows) {
+                        if (err) console.log(err)
+                        else {
+                            res.send(rows)
+                        }
+                    })
+                }
+            })
+        })
+    }
 })
 
 router.post('/applyCo', function (req, res) {
@@ -462,7 +498,7 @@ router.get('/downloadReport', function (req,res) {
                 res.send('0')
             }
             else {
-                res.download(rows[0].reportURL)
+                res.download('/home/deploy/was/'+rows[0].reportURL)
             }
         }
     })
@@ -718,6 +754,7 @@ router.get('/checkPickCo',function(req,res){
         var sql = 'select * from student natural join company natural join companyNotice natural join applyNotice natural join stdPickCo natural join applyTerm where sLoginID = ? and cName = ? and applySemester =? and applyOrder=?'
         var params = [req.query.sLoginID, req.query.cName, req.query.applySemester, req.query.applyOrder]
         //console.log('query : '+ req.query.cName)
+    console.log('sdfsf'+req.query)
         conn.init().query(sql, params, function (err, rows) {
 
             if (err) console.log(err)
@@ -745,8 +782,8 @@ router.post('/postStdPickCo', function (req, res) {
         })
     function first() {
         return new Promise(function (resolve,reject) {
-            var sql1 = 'select sID, applyNoticeID, sLoginID, cName from student join company join companyNotice join applyNotice where student.sLoginID = ? and company.cName = ? and companyNotice.cID = company.cID and companyNotice.cNoticeID = applyNotice.cNoticeID'
-            var params1 = [req.body.sLoginID, req.body.cName]
+            var sql1 = 'select sID, applyNoticeID, sLoginID, cName from student join company join companyNotice join applyNotice join applyTerm where student.sLoginID = ? and company.cName = ? and companyNotice.cID = company.cID and companyNotice.cNoticeID = applyNotice.cNoticeID and applyNotice.applyTermID = applyTerm.applyTermID and applyOrder = ?'
+            var params1 = [req.body.sLoginID, req.body.cName, req.body.applyOrder]
             conn.init().query(sql1, params1, function (err,rows) {
                 if(err) console.log(err)
                 else{
