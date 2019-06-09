@@ -197,6 +197,65 @@ router.post('/std/changepw',(req,res)=>{
     
 })
 
+router.post('/co/changepw',(req,res)=>{
+    Promise.resolve()
+        .then(getUser)
+        .then(checkPW)
+        .catch(function (err) {
+            console.log('Error', err)
+            process.exit()
+        })
+
+        function getUser(){
+            let id = req.body.cLoginID
+            var sql = 'select cPassword from company where cLoginID = ?'
+            var param = [id]
+            return new Promise(function (resolve, reject) {
+                conn.init().query(sql, param, function(err, rows){
+                    if(err) console.log(err)
+                    else {
+                        if(rows.length==0){//존재하지 않은 유저임
+                            return res.send({result:0})
+                        }
+                        else{
+                            console.log(rows[0].cPassword)
+                            resolve(rows[0].cPassword)
+                        }
+                    }
+                })
+            })
+        }
+        function checkPW(password){
+            var p = req.body.presentpw
+            var c = req.body.changepw
+            
+            return new Promise(function (resolve, reject) {
+            bcrypt.compare(p, password).then(result => {
+                if(result){
+                    bcrypt.hash(c, 12).then(hashed => {
+                        var id = req.body.cLoginID
+                        console.log(hashed)
+                        var sql = 'update company SET cPassword = ? where cLoginID = ?'
+                        var param = [hashed,id]
+                        conn.init().query(sql, param, function(err, rows){
+                            if(err) console.log(err)
+                            else {
+                                console.log(rows)
+                                res.send({result:2})
+                            }
+                        })
+                        
+                    });
+                }
+                else{
+                    return res.send({result:1});
+                }
+            })
+        })
+    }
+    
+})
+
 router.post('/std/signup',(req,res)=>{
     Promise.resolve()
         .then(signUp)
