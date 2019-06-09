@@ -1051,29 +1051,34 @@ router.post('/changeYNApplyStd', function(req, res)
     }
 
     function InternTerm(stdApplyCoIDs) {
+
         var sql1 = 'SELECT internTermStart, internTermEnd FROM companyNotice natural join company natural join applyNotice natural join applyTerm where cLoginID =? and applySemester =?'
         var params = [req.body.cLoginID, req.body.applySemester]
+        console.log(params)
         return new Promise(function (resolve, reject) {
             conn.init().query(sql1, params, function (err, rows) {
                 if (err) reject(err)
                 else {
                     console.log(rows)
-                    var internTerm = [rows[0].internTermStart, rows[0].internTermEnd]
-                    resolve(stdApplyCoIDs, internTerm)
+                    var data = {
+                        stdApplyCoIDs : stdApplyCoIDs,
+                        internTermStart : rows[0].internTermStart,
+                        internTermEnd : rows[0].internTermEnd}
+                    resolve(data)
                 }
             })
         })
     }
 
-    function makeInternDetail2(stdApplyCoIDs,internTerm) {
+    function makeInternDetail2(data) {
         var sql = 'INSERT INTO internDetail (stdApplyCoID, attendence) VALUES (?,?)'
         var index = 1
-        while (stdApplyCoIDs[index]) {
+        while (data.stdApplyCoIDs[index]) {
             sql += ', (?,?)'
             index++
         }
-        var start = internTerm[0]
-        var end = internTerm[1]
+        var start = data.internTermStart
+        var end = data.internTermEnd
         var startYear = start.getFullYear()
         var startDate = start.getDate()
         console.log(startDate)
@@ -1124,8 +1129,8 @@ router.post('/changeYNApplyStd', function(req, res)
         }
         var jsonType = JSON.stringify(attendenceArray)
         var params = new Array()
-        for(var z = 0 ; z<stdApplyCoIDs.length ; z++){
-            params.push(stdApplyCoIDs[z], jsonType)
+        for(var z = 0 ; z<data.stdApplyCoIDs.length ; z++){
+            params.push(data.stdApplyCoIDs[z], jsonType)
         }
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
@@ -1457,7 +1462,7 @@ router.get('/getProfileImage', function(req,res)
             resolve(0)
         }
         else{
-            res.download('/home/deploy/was/'+rows[0].cImage);
+            res.download(rows[0].cImage);
         }
         }
     })
