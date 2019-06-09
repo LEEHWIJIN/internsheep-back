@@ -1155,7 +1155,7 @@ router.get('/showCompanyInfo', function(req, res)
         else 
         {
             console.log(rows)
-            res.send('1')
+            res.send(rows)
         }
     })
 })
