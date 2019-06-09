@@ -1159,7 +1159,7 @@ router.get('/showCompanyInfo', function(req, res)
         else 
         {
             console.log(rows)
-            res.send('1')
+            res.send(rows)
         }
     })
 })
@@ -1168,16 +1168,16 @@ router.post('/modifyCompanyInfo', function(req, res)
 {
     console.log('modifying...')
     var loginID = req.body.cLoginID
-    var sql = 'UPDATE company SET cManagerName = ?, cManagerPhone = ?, cLocation = ?, cCeoPhone = ?, cName = ?, ceoName = ?, companyNum = ? WHERE cLoginID = ?'
-     
-    var managerName = req.body.data.cManagerName
-    var managerPhone = req.body.data.cManagerPhone
-    var location = req.body.data.data.cLocation
+    var sql = 'UPDATE company SET cCeoPhone = ?, cLocation = ? , cName = ?  WHERE cLoginID = ?'
+     console.log(req.body.data)
+    // var managerName = req.body.data.cManagerName
+    // var managerPhone = req.body.data.cManagerPhone
+    var location = req.body.data.cLocation
     var ceoPhone = req.body.data.cCeoPhone
     var cName = req.body.data.cName
-    var ceoName = req.body.data.cCeoName
-    var companyNum = req.body.data.cCompanyNum
-    var sqlParams = [managerName, managerPhone, location, ceoPhone, cName, ceoName, companyNum, loginID]
+    // var ceoName = req.body.data.cCeoName
+    // var companyNum = req.body.data.cCompanyNum
+    var sqlParams = [ceoPhone, location, cName,  loginID]
     conn.init().query(sql, sqlParams, function(err,rows)
     {
         if(err)res.send(err)
@@ -1319,6 +1319,7 @@ router.get('/loadHiredStd', function(req, res)
 {
     var cLoginID = req.query.cLoginID
     var applySemester = req.query.applySemester
+    console.log(req.query.applySemester)
     var sql = 'SELECT sLoginID,sName FROM student natural join company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN applyTerm NATURAL JOIN stdApplyCo NATURAL JOIN internDetail WHERE cLoginID = ? and applySemester =?'
     var params = [cLoginID, applySemester]
     conn.init().query(sql, params, function(err, rows)
