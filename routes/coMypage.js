@@ -907,7 +907,7 @@ router.post('/changeYNApplyStd', function(req, res)
     .then(makeInternDetail1)
     .then(endRecruitment)
     .then(InternTerm)
-        .then(makeInternDetail2)
+    .then(makeInternDetail2)
     .catch(function (err) {
         console.log('Error', err)
         process.exit()
@@ -915,6 +915,7 @@ router.post('/changeYNApplyStd', function(req, res)
 
     function makeSql1()
     {
+        console.log(req.body.data)
         var sql = 'UPDATE stdApplyCo SET YN = CASE stdApplyCoID '
         var IDandYN = []
         var index = 0;
@@ -932,6 +933,7 @@ router.post('/changeYNApplyStd', function(req, res)
             IDandYN[2*index] = req.body.data[0].stdApplyCoID
             param[0] = sql
             param[1] = IDandYN
+            param[2] = index
             console.log(param)
             resolve(param)
         })
@@ -941,13 +943,15 @@ router.post('/changeYNApplyStd', function(req, res)
     {
         sql = param[0] + 'ELSE YN END WHERE stdApplyCoID IN (?'
         IDandYN = param[1]
+        
         var index = 1
+        var queryIndex = 2*param[2]
         while(req.body.data[index])
         {
             sql += ', ?'
-            IDandYN[2*req.body.data.length + 1] = req.body.data[index].stdApplyCoID
+            IDandYN[queryIndex + 1] = req.body.data[index].stdApplyCoID
+            queryIndex++
             index++
-
         }
         return new Promise(function (resolve, reject)
         {
