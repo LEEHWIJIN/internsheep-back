@@ -14,7 +14,7 @@ var storage = multer.diskStorage({
     }
 })
 
-var upload = multer({storage: storage, limits: { fieldSize: 5 * 1024 * 1024 }})
+var upload = multer({storage: storage})
 
 router.post('/resume', function (req, res) {
 
@@ -502,7 +502,7 @@ router.get('/downloadReport', function (req,res) {
                 // console.log(rows[0].reportURL)
                 // res.download(rows[0].reportURL)
 
-                res.download(rows[0].reportURL)
+                res.download('/home/deploy/was/'+rows[0].reportURL)
 
             }
         }
