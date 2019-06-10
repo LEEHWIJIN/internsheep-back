@@ -1293,7 +1293,6 @@ router.get('/loadInterTerm',function(req,res){
                 var endMonth = rows[0].internTermEnd.getMonth()
                 var endDate = rows[0].internTermEnd.getDate()
                 var end =  new Date(endYear,endMonth,endDate,9,0,0)
-                console.log(req.query.data)
                 var convert = req.query.date.split('-')
                 var selectYear = convert[0]
                 var selectMonth = convert[1]-1
@@ -1365,6 +1364,8 @@ router.post('/changeAttend', function(req, res)
         var sql = "UPDATE internDetail set attendence =? where internID = ?"
         var beforeAttendence = JSON.parse(data.attendence)
         var afterAttendence = new Array()
+        console.log("출석이다.",req.body.data.val)
+        console.log("아이디이다.",req.body.data.id)
         for(var i =0 ;i<beforeAttendence.length ; i++){
             if(beforeAttendence[i].id == req.body.data.id){
                 afterAttendence.push({"id" : beforeAttendence[i].id, "val" : req.body.data.val})
