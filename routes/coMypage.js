@@ -272,7 +272,7 @@ router.post('/writeNotice', upload.single('image'), function(req, res){
         var numOfPeople = req.body.cNumOfPeople
         var info = req.body.cInfo
         var cEmail = req.body.cEmail
-        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cInfo, cEmail) VALUES(?,?,?,?,?,?,?,?,?,?)'
+        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cInfo, cEmail) VALUES(?,?,?,?,?,?,?,?,?)'
         var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, info, cEmail]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
