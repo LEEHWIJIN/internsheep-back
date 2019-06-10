@@ -510,7 +510,7 @@ router.get('/downloadReport', function (req,res) {
 
 router.get('/checkReportTerm', function (req,res) {
 
-            var sql = 'SELECT internTermStart,internTermEnd FROM companyNotice natural join stdApplyCo natural join student natural join applyNotice natural join applyTerm WHERE sLoginID = ? and applySemester =? and YN = 1'
+            var sql = 'SELECT internTermStart,internTermEnd FROM internDetail natural join companyNotice natural join stdApplyCo natural join student natural join applyNotice natural join applyTerm WHERE sLoginID = ? and applySemester =? and YN = 1'
     var sLoginID = req.query.sLoginID
     var applySemester = req.query.applySemester
     var params = [sLoginID, applySemester]

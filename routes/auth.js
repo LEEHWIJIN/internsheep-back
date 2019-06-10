@@ -353,7 +353,7 @@ router.post('/std/signup',(req,res)=>{
             else
             {
                 console.log('Email sent: ' + info.response)
-                res.send('이메일을 확인해주세요.')
+                res.send('인증 메일을 전송 하였습니다. 이메일을 확인해주세요.')
             }
         })
     }
