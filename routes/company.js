@@ -33,7 +33,7 @@ router.get('/getAllTag', function(req,res)
 
 router.get('/getCoTag', function(req,res)
 {
-    var sqlQuery = 'SELECT tag FROM tag natural join coAndTag natural join company WHERE cLoginID = ?'
+    var sqlQuery = 'SELECT tag FROM tag natural join coAndTag natural join company natural join companyNotice WHERE cLoginID = ?'
     var cName = req.query.cLoginID
 
     conn.init().query(sqlQuery, cName, function(rows,err)
