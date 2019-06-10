@@ -33,7 +33,7 @@ router.get('/getAllTag', function(req,res)
 
 router.get('/getCoTag', function(req,res)
 {
-    var sqlQuery = 'SELECT tag FROM tag natural join coAndTag natural join company WHERE cLoginID = ?'
+    var sqlQuery = 'SELECT tag FROM tag natural join coAndTag natural join company natural join companyNotice WHERE cLoginID = ?'
     var cName = req.query.cLoginID
 
     conn.init().query(sqlQuery, cName, function(rows,err)
@@ -65,6 +65,8 @@ router.post('/addTag', function(req,res)
 router.post('/addCoAndTag', function(req,res)
 {
     Promise.resolve()
+    .then(search)
+        .then(deleteTag)
         .then(first)
         .then(second)
         .then(three)
@@ -72,6 +74,53 @@ router.post('/addCoAndTag', function(req,res)
             console.log('Error', err)
             process.exit()
         })
+
+        function search(){
+            return new Promise(function (resolve,reject) {
+            var sql = 'select coAndTagID From company natural join companyNotice natural join coAndTag natural join tag where cLoginID = ?'
+            conn.init().query(sql, req.body.cLoginID, function(err, rows)
+            {
+                if(err) console.log(err)
+                else
+                {
+                    if(rows[0]==null){
+                        resolve(0)
+                    }
+                    else{
+                        resolve(rows)
+                    }
+                    
+                }
+            })
+        })
+
+        }
+        function deleteTag(data)
+        {
+            return new Promise(function (resolve,reject) {
+                if(data==0){
+                    console.log('삭제한것 없음')
+                    resolve()
+                }
+                else{
+                
+                for(var i=0;i<data.length;i++){
+                    var sql = 'delete from coAndTag where coAndTagID = ?'
+                    conn.init().query(sql,data[i].coAndTagID, function(err, rows)
+                    {
+                        if(err) console.log(err)
+                        else
+                        {
+                            console.log(i)
+                    
+                        }
+                    })
+                    if(i==data.length-1){resolve()}
+                }
+                
+            }
+            })
+        }
 
     function first()
     {
@@ -82,7 +131,7 @@ router.post('/addCoAndTag', function(req,res)
                 if(err) console.log(err)
                 else
                 {
-                    console.log(rows[0])
+                    console.log('first 들어옴 ' +rows[0])
                     resolve(rows[0].cNoticeID)
                 }
             })
@@ -92,9 +141,6 @@ router.post('/addCoAndTag', function(req,res)
     {
         return new Promise(function (resolve,reject) {
             var sql = 'select tagID from tag where tag = ?'
-            //var arr = new Array()
-            //arr.push(req.body.tag)
-            //console.log(req.body.tag)
             for(var i =0 ;i<req.body.tag.length-1; i++){
                 sql += 'union select tagID from tag where tag = ?'
             }

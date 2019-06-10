@@ -5,7 +5,9 @@ module.exports = (function () {
       port: '3306',
       user: 'root',
       password: 'Dlsxjstnlq1!',
-      database: 'capstone'
+      database: 'capstone',
+      multipleStatements : true
+      
     },
     real: { // real server db info
       host: '',

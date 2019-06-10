@@ -52,7 +52,7 @@ router.get("/confirm", function(req,res)
 })
 router.get('/certifyingComplete',function(req,res)
 {   
-    var url = "'http://std.ajou-internsheep.co/login'"
+    var url = "'http://stud.ajou-internsheep.co/login'"
     var sendMassage = '<script type="text/javascript">alert("인증이 완료 되었습니다.")</script>'+'<script>'+'location.replace('+ url +');'+'</script>'
     console.log(sendMassage)
     res.send(sendMassage)

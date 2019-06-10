@@ -211,22 +211,22 @@ router.get('/checkApplyNotice', function(req, res)
     }
 })
 
-router.post('/writeNotice', upload.single('image'), function(req, res){
+router.post('/writeNotice', upload.single('image'),function(req, res){
     Promise.resolve()
         .then(getCompanyNotice)
         .then(writeLocation)
         .then(writeCompanyNotice)
-        .then(uploadImage)
+        // .then(uploadImage)
         .catch(function (err) {
             console.log('Error', err)
             process.exit()
         })
 
     function getCompanyNotice() {
-        
+        console.log(req.body)
         var sql = 'SELECT* FROM company WHERE cLoginID = ?'
         var cLoginID = req.body.cLoginID
-        //console.log(cLoginID)
+        // console.log(req.data)
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
@@ -270,37 +270,37 @@ router.post('/writeNotice', upload.single('image'), function(req, res){
         var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
         var occupation = req.body.cOccupation
         var numOfPeople = req.body.cNumOfPeople
-        var tag = req.body.cTag
         var info = req.body.cInfo
         var cEmail = req.body.cEmail
-        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cTag, cInfo, cEmail) VALUES(?,?,?,?,?,?,?,?,?,?)'
-        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, info, cEmail]
+        var sql = 'INSERT INTO companyNotice (cID, cBenefit, cPay, internTermStart, internTermEnd, cOccupation, cNumOfPeople, cInfo, cEmail) VALUES(?,?,?,?,?,?,?,?,?)'
+        var params = [cID,benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, info, cEmail]
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                        resolve(0)
-                }
-            })
-        })
-    }
-    function uploadImage()
-    {
-        console.log('uploading...')
-        var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
-        return new Promise(function (resolve,reject) {
-            var imgURL = req.file.path
-            var params2 = [imgURL, req.body.cLoginID]
-            conn.init().query(sql2, params2, function (err, rows) {
-                if (err) console.log(err)
-                else {
-                    console.log(rows)
                     resolve(rows)
                     res.send(rows)
                 }
             })
         })
     }
+    // function uploadImage()
+    // {
+    //     console.log('uploading...')
+    //     var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+    //     return new Promise(function (resolve,reject) {
+    //         var imgURL = req.file.path
+    //         var params2 = [imgURL, req.body.cLoginID]
+    //         conn.init().query(sql2, params2, function (err, rows) {
+    //             if (err) console.log(err)
+    //             else {
+    //                 console.log(rows)
+    //                 resolve(rows)
+    //                 res.send(rows)
+    //             }
+    //         })
+    //     })
+    // }
 })
 
 router.get('/watchNotice', function(req, res){
@@ -325,7 +325,7 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
     .then(writeLocation)
     .then(writeCompanyNotice)
     // .then(unlinkImage)
-    .then(uploadImage)
+    // .then(uploadImage)
     .catch(function (err) {
         console.log('Error', err)
         process.exit()
@@ -388,12 +388,12 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
         var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
         var occupation = req.body.cOccupation
         var numOfPeople = req.body.cNumOfPeople
-        var tag = req.body.cTag
+        // var tag = req.body.cTag
         var cInfo = req.body.cInfo
         var cEmail = req.body.cEmail
 
-        var sql = 'UPDATE companyNotice SET cInfo =?, cEmail =?, cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
-        var params = [cInfo, cEmail, benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
+        var sql = 'UPDATE companyNotice SET cInfo =?, cEmail =?, cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ? WHERE cID = ?'
+        var params = [cInfo, cEmail, benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople,  cID]
         
         
         return new Promise(function (resolve, reject) {
@@ -401,7 +401,8 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
                 if (err) reject(err)
                 else {
                         //console.log(rows)
-                        resolve(0)
+                        resolve(rows)
+                        res.send(rows)
                 }
             })
         })
@@ -428,32 +429,32 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
     //         })
     //     })
     // }
-    function uploadImage()
-    {
-        console.log('uploading...')
-        var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
-        return new Promise(function (resolve,reject) {
-            if(req.file)
-            {
-                var imgURL = req.file.path
-                console.log('zzz' , req.body.cLoginID)
-                var params2 = [imgURL, req.body.cLoginID]
-                conn.init().query(sql2, params2, function (err, rows) {
-                    if (err) console.log(err)
-                    else {
-                        console.log(rows)
-                        resolve(rows)
-                        res.send(rows)
-                    }
-                })
-            }
-            else
-            {
-                console.log('no image')
-                res.send('0')
-            }
-        })
-    }
+    // function uploadImage()
+    // {
+    //     console.log('uploading...')
+    //     var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+    //     return new Promise(function (resolve,reject) {
+    //         if(req.file)
+    //         {
+    //             var imgURL = req.file.path
+    //             console.log('zzz' , req.body.cLoginID)
+    //             var params2 = [imgURL, req.body.cLoginID]
+    //             conn.init().query(sql2, params2, function (err, rows) {
+    //                 if (err) console.log(err)
+    //                 else {
+    //                     console.log(rows)
+    //                     resolve(rows)
+    //                     res.send(rows)
+    //                 }
+    //             })
+    //         }
+    //         else
+    //         {
+    //             console.log('no image')
+    //             res.send('0')
+    //         }
+    //     })
+    // }
 })
 
 router.get('/showApplyNotice', function(req, res){
@@ -1465,7 +1466,7 @@ router.get('/getProfileImage', function(req,res)
         if(err) res.send(err)
         else
         {if(rows[0].cImage==null){
-            resolve(0)
+            res.send('0')
         }
         else{
             res.download(rows[0].cImage);
