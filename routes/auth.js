@@ -334,8 +334,8 @@ router.post('/std/signup',(req,res)=>{
     {
         console.log('sfsddfsdf  ' + req.body.email)
         var userEmail = req.body.email
-        var url = 'http://localhost:8888/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
-        // var url = 'http://api.ajou-internsheep.co/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
+        //var url = 'http://localhost:8888/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
+        var url = 'http://api.ajou-internsheep.co/certification/confirm?certificationKey='+certificationKey+'&sLoginID='+req.body.user.id
         var mailOption = {
             from: mailInfo.auth.user,
             to: userEmail,
