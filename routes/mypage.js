@@ -378,10 +378,11 @@ router.post('/applyCo', function (req, res) {
 })
 
 router.get('/applyStatus', function (req, res) {
-    var sql = 'SELECT YN FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student natural join applyTerm WHERE sLoginID = ? and applySemester =?'
+    var sql = 'SELECT YN FROM company NATURAL JOIN companyNotice NATURAL JOIN applyNotice NATURAL JOIN stdApplyCo NATURAL JOIN student natural join applyTerm WHERE sLoginID = ? and applySemester =? and applyOrder = ?'
     var sLoginID = req.query.sLoginID
     var applySemester = req.query.applySemester
-    var params = [sLoginID, applySemester]
+    var applyOrder = req.query.applyOrder
+    var params = [sLoginID, applySemester, applyOrder]
     conn.init().query(sql, params, function (err, rows) {
         if (err) console.log(err)
         else {
