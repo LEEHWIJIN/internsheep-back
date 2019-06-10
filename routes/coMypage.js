@@ -1063,7 +1063,7 @@ router.post('/changeYNApplyStd', function(req, res)
             conn.init().query(sql1, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                    console.log(rows)
+                    console.log('ㅋㅋㅋㅋ   '+rows)
                     var data = {
                         stdApplyCoIDs : stdApplyCoIDs,
                         internTermStart : rows[0].internTermStart,
@@ -1293,7 +1293,8 @@ router.get('/loadInterTerm',function(req,res){
                 var endMonth = rows[0].internTermEnd.getMonth()
                 var endDate = rows[0].internTermEnd.getDate()
                 var end =  new Date(endYear,endMonth,endDate,9,0,0)
-                var convert = req.query.date.split('.')
+                console.log(req.query.data)
+                var convert = req.query.date.split('-')
                 var selectYear = convert[0]
                 var selectMonth = convert[1]-1
                 var selectDate = convert[2]
