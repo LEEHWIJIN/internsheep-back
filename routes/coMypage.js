@@ -211,22 +211,22 @@ router.get('/checkApplyNotice', function(req, res)
     }
 })
 
-router.post('/writeNotice', upload.single('image'), function(req, res){
+router.post('/writeNotice', upload.single('image'),function(req, res){
     Promise.resolve()
         .then(getCompanyNotice)
         .then(writeLocation)
         .then(writeCompanyNotice)
-        .then(uploadImage)
+        // .then(uploadImage)
         .catch(function (err) {
             console.log('Error', err)
             process.exit()
         })
 
     function getCompanyNotice() {
-        
+        console.log(req.body)
         var sql = 'SELECT* FROM company WHERE cLoginID = ?'
         var cLoginID = req.body.cLoginID
-        //console.log(cLoginID)
+        // console.log(req.data)
         return new Promise(function (resolve, reject) {
             conn.init().query(sql, cLoginID, function (err, rows) {
                 if (err) reject(err)
@@ -278,28 +278,29 @@ router.post('/writeNotice', upload.single('image'), function(req, res){
             conn.init().query(sql, params, function (err, rows) {
                 if (err) reject(err)
                 else {
-                        resolve(0)
-                }
-            })
-        })
-    }
-    function uploadImage()
-    {
-        console.log('uploading...')
-        var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
-        return new Promise(function (resolve,reject) {
-            var imgURL = req.file.path
-            var params2 = [imgURL, req.body.cLoginID]
-            conn.init().query(sql2, params2, function (err, rows) {
-                if (err) console.log(err)
-                else {
-                    console.log(rows)
                     resolve(rows)
                     res.send(rows)
                 }
             })
         })
     }
+    // function uploadImage()
+    // {
+    //     console.log('uploading...')
+    //     var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+    //     return new Promise(function (resolve,reject) {
+    //         var imgURL = req.file.path
+    //         var params2 = [imgURL, req.body.cLoginID]
+    //         conn.init().query(sql2, params2, function (err, rows) {
+    //             if (err) console.log(err)
+    //             else {
+    //                 console.log(rows)
+    //                 resolve(rows)
+    //                 res.send(rows)
+    //             }
+    //         })
+    //     })
+    // }
 })
 
 router.get('/watchNotice', function(req, res){
@@ -324,7 +325,7 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
     .then(writeLocation)
     .then(writeCompanyNotice)
     // .then(unlinkImage)
-    .then(uploadImage)
+    // .then(uploadImage)
     .catch(function (err) {
         console.log('Error', err)
         process.exit()
@@ -400,7 +401,8 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
                 if (err) reject(err)
                 else {
                         //console.log(rows)
-                        resolve(0)
+                        resolve(rows)
+                        res.send(rows)
                 }
             })
         })
@@ -427,32 +429,32 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
     //         })
     //     })
     // }
-    function uploadImage()
-    {
-        console.log('uploading...')
-        var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
-        return new Promise(function (resolve,reject) {
-            if(req.file)
-            {
-                var imgURL = req.file.path
-                console.log('zzz' , req.body.cLoginID)
-                var params2 = [imgURL, req.body.cLoginID]
-                conn.init().query(sql2, params2, function (err, rows) {
-                    if (err) console.log(err)
-                    else {
-                        console.log(rows)
-                        resolve(rows)
-                        res.send(rows)
-                    }
-                })
-            }
-            else
-            {
-                console.log('no image')
-                res.send('0')
-            }
-        })
-    }
+    // function uploadImage()
+    // {
+    //     console.log('uploading...')
+    //     var sql2 = 'UPDATE company SET cImage = ? WHERE cLoginID = ?'
+    //     return new Promise(function (resolve,reject) {
+    //         if(req.file)
+    //         {
+    //             var imgURL = req.file.path
+    //             console.log('zzz' , req.body.cLoginID)
+    //             var params2 = [imgURL, req.body.cLoginID]
+    //             conn.init().query(sql2, params2, function (err, rows) {
+    //                 if (err) console.log(err)
+    //                 else {
+    //                     console.log(rows)
+    //                     resolve(rows)
+    //                     res.send(rows)
+    //                 }
+    //             })
+    //         }
+    //         else
+    //         {
+    //             console.log('no image')
+    //             res.send('0')
+    //         }
+    //     })
+    // }
 })
 
 router.get('/showApplyNotice', function(req, res){
