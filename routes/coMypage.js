@@ -388,12 +388,12 @@ router.post('/modifyNotice', upload.single('image'), function(req, res)
         var internTermStart = new Date(startYear,startMonth, startDate, 9, 0,0)
         var occupation = req.body.cOccupation
         var numOfPeople = req.body.cNumOfPeople
-        var tag = req.body.cTag
+        // var tag = req.body.cTag
         var cInfo = req.body.cInfo
         var cEmail = req.body.cEmail
 
-        var sql = 'UPDATE companyNotice SET cInfo =?, cEmail =?, cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ?, cTag = ? WHERE cID = ?'
-        var params = [cInfo, cEmail, benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople, tag, cID]
+        var sql = 'UPDATE companyNotice SET cInfo =?, cEmail =?, cBenefit = ?, cPay = ?, internTermStart = ?, internTermEnd = ?, cOccupation = ?, cNumOfPeople = ? WHERE cID = ?'
+        var params = [cInfo, cEmail, benefit, pay, internTermStart, internTermEnd, occupation, numOfPeople,  cID]
         
         
         return new Promise(function (resolve, reject) {
