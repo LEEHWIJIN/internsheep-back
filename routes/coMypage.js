@@ -1464,7 +1464,7 @@ router.get('/getProfileImage', function(req,res)
         if(err) res.send(err)
         else
         {if(rows[0].cImage==null){
-            resolve(0)
+            res.send('0')
         }
         else{
             res.download(rows[0].cImage);
