@@ -211,6 +211,20 @@ router.get('/checkApplyNotice', function(req, res)
     }
 })
 
+router.get('/getCoTagList', function(req,res)
+{
+    var sql = 'SELECT cName, tag FROM tag natural join coAndTag natural join company natural join companyNotice '
+
+    conn.init().query(sql, function(rows,err)
+    {
+        if(err) res.send(err)
+        else
+        {
+            res.json(rows)
+        }
+    })
+})
+
 router.post('/writeNotice', upload.single('image'),function(req, res){
     Promise.resolve()
         .then(getCompanyNotice)
