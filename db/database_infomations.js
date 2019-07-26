@@ -1,7 +1,7 @@
 module.exports = (function () {
   return {
     local: { // localhost
-      host: '106.10.46.244',
+      host: '54.180.173.242',
       port: '3306',
       user: 'root',
       password: 'Dlsxjstnlq1!',
